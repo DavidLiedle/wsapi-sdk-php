@@ -12,6 +12,7 @@ build/*
 *.pbxuser
 *.xcworkspace
 xcuserdata
+sdk/error_logs/*
 
 # svn & cvs
 .svn
