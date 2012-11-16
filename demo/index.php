@@ -11,8 +11,9 @@
 
 /*  initiate our API class instance  */
 
-require_once(__DIR__.'/../sdk/weather_source_api.sdk.php');
-$api = new Weather_Source_API( $base_url, $version, $key );
+require_once( __DIR__ . '/../sdk/weather_source_api.sdk.php' );
+
+$api = new Weather_Source_API( $return_diagnostics = FALSE, $suppress_response_codes = FALSE );
 
 
 /*  set request variables  */
@@ -32,7 +33,6 @@ $request_parameters = array(
 
 $json_response = $api->request( $request_method, $request_path, $request_parameters );
 
-print_r( $json_response );
 
 /*  do something with the response  */
 
