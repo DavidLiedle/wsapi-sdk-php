@@ -112,7 +112,7 @@ class Weather_Source_API {
 
             $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-            if( !in_array($status_code, array(500,501,502,503,504,505)) ) {
+            if( !in_array($status_code, array(500,502,503,504)) ) {
                 break;
             }
         }
