@@ -19,4 +19,4 @@ CVS
 
 #custom rules
 sdk/error_logs/*
-config.php
+sdk/config.php
