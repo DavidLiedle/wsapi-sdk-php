@@ -16,3 +16,5 @@ xcuserdata
 # svn & cvs
 .svn
 CVS
+sdk/config.php
+sdk/error_logs/*
