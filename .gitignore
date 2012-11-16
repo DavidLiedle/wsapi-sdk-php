@@ -18,5 +18,5 @@ xcuserdata
 CVS
 
 #custom rules
-sdk/error_logs/*
 sdk/config.php
+sdk/error_logs/*
