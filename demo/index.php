@@ -4,15 +4,9 @@
  *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 1
+ * @since v1
  *
  */
-
-/*  set API connection variables  */
-
-$base_url = 'https://api.weathersource.dev';
-$version  = 'v1';
-$key      = '123450';  // add your API subscription key here
 
 
 /*  initiate our API class instance  */
@@ -24,11 +18,11 @@ $api = new Weather_Source_API( $base_url, $version, $key );
 /*  set request variables  */
 
 $request_method     = 'GET';
-$request_path       = 'history';
+$request_path       = 'history_by_postal_code';
 $request_parameters = array(
                           'period'            => 'day',
-                          'latitude_eq'       => '42.8706',
-                          'longitude_eq'      => '-70.9168',
+                          'postal_code_eq'    => '22222',
+                          'country_eq'        => 'US',
                           'timestamp_between' => '2011-01-01,2011-01-05',
                           'fields'            => 'tempMax',
                       );
