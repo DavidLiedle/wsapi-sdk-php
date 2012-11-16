@@ -12,9 +12,11 @@ build/*
 *.pbxuser
 *.xcworkspace
 xcuserdata
-sdk/error_logs/*
-sdk/config.php
 
 # svn & cvs
 .svn
 CVS
+
+#custom rules
+sdk/error_logs/*
+sdk/config.php
