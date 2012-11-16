@@ -16,5 +16,7 @@ xcuserdata
 # svn & cvs
 .svn
 CVS
-sdk/config.php
+
+#custom rules
 sdk/error_logs/*
+sdk/config.php
