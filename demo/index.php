@@ -11,7 +11,7 @@
 
 /*  initiate our API class instance  */
 
-require_once( __DIR__ . '/../sdk/weathersource_api.sdk.php' );
+require_once( __DIR__ . '/../sdk/weather_source_api.php' );
 
 $api = new Weather_Source_API( $return_diagnostics = FALSE, $suppress_response_codes = FALSE );
 
