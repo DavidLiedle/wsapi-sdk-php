@@ -4,7 +4,7 @@
  *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 1.2
+ * @since Version 1.3
  *
  */
 
