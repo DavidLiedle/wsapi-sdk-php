@@ -55,7 +55,7 @@ class Weather_Source_API {
         $this->return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
         $this->suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES  : FALSE;
         $this->log_errors              = defined('WSAPI_LOG_ERRORS') ? (boolean) WSAPI_LOG_ERRORS : FALSE;
-        $this->error_log_directory     = defined('WSAPI_ERROR_LOG_DIRECTORY') ? (string) WSAPI_ERROR_LOG_DIRECTORY : '/error_logs/';
+        $this->error_log_directory     = defined('WSAPI_ERROR_LOG_DIRECTORY') ? (string) WSAPI_ERROR_LOG_DIRECTORY : 'error_logs/';
         $this->request_retry_count     = defined('WSAPI_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSAPI_REQUEST_RETRY_ON_ERROR_COUNT : 5;
         $this->request_retry_delay     = defined('WSAPI_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSAPI_REQUEST_RETRY_ON_ERROR_DELAY : 2;
     }
@@ -122,6 +122,11 @@ class Weather_Source_API {
         }
 
 
+        /*  close connection  */
+
+        curl_close($ch);
+
+
         /*  process $json_response  */
 
         $response = $this->process_response( $json_response, $response_code );
@@ -144,16 +149,11 @@ class Weather_Source_API {
         }
 
 
-        /*  close connection  */
-
-        curl_close($ch);
-
-
         /*  write to error log if appropriate  */
 
-        if( $response_code != 200 && $this->log_errors === TRUE ) {
+        if( !$this->is_ok() && $this->log_errors === TRUE ) {
             $request_uri = $uri . '?' . http_build_query($parameters);
-            $this->write_to_error_log( $request_uri, $response_code, $response );
+            $this->write_to_error_log( $request_uri );
         }
 
 
@@ -240,42 +240,39 @@ class Weather_Source_API {
      *
      *  Set the HTTP Status Code for the most recent request
      *
-     *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
+     *  @param  integer  $request_uri  REQUIRED  The API request URI
      *
      *  @return NULL
      */
-    protected function write_to_error_log( $request_uri, $response_code, $response ) {
+    protected function write_to_error_log( $request_uri ) {
 
-        // get the current timestamp
-        $timestamp = date('c');
+        if( !$this->is_ok() ) {
+            // compose our error message
+            $timestamp = date('c');
+            $error_message = "[{$timestamp}] [Error {$this->response_code} | {$this->error_message}] [{$request_uri}]\r\n";
 
-        // get the http response message
-        if( is_array($response) && ( ( !$this->return_diagnostics && !empty($response_arr['message']) ) || ( $this->return_diagnostics && !empty($response_arr['response']['message']) ) ) ) {
-            if( $this->return_diagnostics ) {
-                $http_response_message = $response_arr['response']['message'];
-            } else {
-                $http_response_message = $response_arr['message'];
+            // assemble our path parts
+            $error_log_directory = $this->error_log_directory;
+            $error_log_directory = substr($error_log_directory, -1) == '/' ? $error_log_directory : $error_log_directory . '/';
+            if( substr($error_log_directory, 0, 1) != '/' ) {
+                // this is a relative path
+                $error_log_directory = $this->root_directory . $error_log_directory;
             }
-        } else {
-            $http_response_message = $this->http_response_message($response_code);
+echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
+
+            // make sure the error log directory exists
+            if( !is_dir($error_log_directory) ) {
+                mkdir($error_log_directory);
+            }
+
+            // assemble our error log filename
+            $error_log_filename = $error_log_directory . 'wsapi_errors_' . date('Ymd') . '.log';
+
+            // write to the error log
+            $file_pointer = fopen($error_log_filename, 'a+');
+            fwrite($file_pointer, $error_message);
+            fclose($file_pointer);
         }
-
-        $error_message = "[{$timestamp}] [Error {$response_code} | {$http_response_message}] [{$request_uri}]\r\n";
-
-        $error_log_directory = $this->error_log_directory;
-        $error_log_directory = substr($error_log_directory, 0, 1) == '/' ? substr($error_log_directory, 1) : $error_log_directory;
-        $error_log_directory = substr($error_log_directory, -1) == '/' ? $error_log_directory : $error_log_directory . '/';
-        $error_log_directory = $this->root_directory . $error_log_directory;
-
-        if( !is_dir($error_log_directory) ) {
-            mkdir($error_log_directory);
-        }
-
-        $error_log_filename = $error_log_directory . 'wsapi_errors_' . date('Ymd') . '.log';
-
-        $file_pointer = fopen($error_log_filename, 'a+');
-        fwrite($file_pointer, $error_message);
-        fclose($file_pointer);
     }
 
 
