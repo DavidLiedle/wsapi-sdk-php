@@ -29,7 +29,7 @@ class Weather_Source_API {
 
         // properties
         $root_directory,
-        $status_code;
+        $response_code;
 
 
     /**
@@ -110,16 +110,16 @@ class Weather_Source_API {
 
             $response = curl_exec($ch);
 
-            $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-            if( !in_array($status_code, array(500,502,503,504)) ) {
+            if( !in_array($response_code, array(500,502,503,504)) ) {
                 break;
             }
         }
 
 
-        /*  set status code  */
-        $this->set_status_code( $status_code );
+        /*  set response code  */
+        $this->set_response_code( $response_code );
 
 
         /*  close connection  */
@@ -129,9 +129,9 @@ class Weather_Source_API {
 
         /*  write to error log if appropriate  */
 
-        if( $status_code != 200 && $this->log_errors === TRUE ) {
+        if( $response_code != 200 && $this->log_errors === TRUE ) {
             $request_uri = $uri . http_build_query($parameters);
-            $this->write_to_error_log( $request_uri, $status_code, $response, $format, $jsonp_callback );
+            $this->write_to_error_log( $request_uri, $response_code, $response, $format, $jsonp_callback );
         }
 
 
@@ -146,44 +146,44 @@ class Weather_Source_API {
      *
      *  @return  integer  the HTTP Status Code for the most recent request (NULL if no previous request)
      */
-    public function get_status_code() {
-        return $this->status_code;
+    public function get_response_code() {
+        return $this->response_code;
     }
 
 
     /**
      *  Set the HTTP Status Code for the most recent request
      *
-     *  @param  integer  $status_code  REQUIRED  The HTTP Status Code for most recent request
+     *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
      *
      *  @return NULL
      */
-    protected function set_status_code( $status_code ) {
-        $this->status_code = $status_code;
+    protected function set_response_code( $response_code ) {
+        $this->response_code = $response_code;
     }
 
 
     /**
      *  Set the HTTP Status Code for the most recent request
      *
-     *  @param  integer  $status_code  REQUIRED  The HTTP Status Code for most recent request
+     *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
      *
      *  @return NULL
      */
-    protected function write_to_error_log( $request_uri, $status_code, $response, $format, $jsonp_callback ) {
+    protected function write_to_error_log( $request_uri, $response_code, $response, $format, $jsonp_callback ) {
 
         // get the current timestamp
         $timestamp = date('c');
 
-        // get the http status message
+        // get the http response message
         $response_arr = json_decode($response, TRUE);
         if( is_array($response_arr) && !empty( $response_arr['message'] ) ) {
-            $http_status_message = $response_arr['message'];
+            $http_response_message = $response_arr['message'];
         } else {
-            $http_status_message = $this->http_status_message($status_code);
+            $http_response_message = $this->http_response_message($response_code);
         }
 
-        $error_message = "[{$timestamp}] [Error {$status_code} | {$http_status_message}] [{$request_uri}]\r\n";
+        $error_message = "[{$timestamp}] [Error {$response_code} | {$http_response_message}] [{$request_uri}]\r\n";
 
         $error_log_directory = $this->error_log_directory;
         $error_log_directory = substr($error_log_directory, 0, 1) == '/' ? substr($error_log_directory, 1) : $error_log_directory;
@@ -204,15 +204,15 @@ class Weather_Source_API {
 
 
     /**
-     *  Get the HTTP Status Message for a givin HTTP Status Code
+     *  Get the HTTP Response Message for a givin HTTP Response Code
      *
-     *  @param  integer  $status_code  REQUIRED  The HTTP Status Code for most recent request
+     *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
      *
-     *  @return string HTTP Status Message
+     *  @return string HTTP Response Message
      */
-    private function http_status_message( $status_code ) {
+    private function http_response_message( $response_code ) {
 
-        if( !is_null($status_code) ) {
+        if( !is_null($response_code) ) {
             switch ($code) {
                 case 100: $text = 'Continue'; break;
                 case 101: $text = 'Switching Protocols'; break;
