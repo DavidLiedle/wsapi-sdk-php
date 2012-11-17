@@ -1,7 +1,7 @@
 <?php
 
-
 /**
+ *
  * Weather Source API PHP SDK
  *
  * Requires PHP version 5.3.0 or greater
@@ -9,7 +9,7 @@
  * @api
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @version v1
+ * @version 1.1
  *
  */
 class Weather_Source_API {
@@ -33,6 +33,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Initiate our class instance
      *
      *  @param boolean $return_diagnostics       OPTIONAL  Return diagnostic information with the response?
@@ -60,6 +61,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Sends request to the Weather Source API
      *
      *  @param  string  $method          REQUIRED  The HTTP method for the request (allowed: 'GET', 'POST', 'PUT', 'DELETE')
@@ -142,6 +144,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Return the HTTP Status Code for the most recent request
      *
      *  @return  integer  the HTTP Status Code for the most recent request (NULL if no previous request)
@@ -152,6 +155,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Set the HTTP Status Code for the most recent request
      *
      *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
@@ -164,6 +168,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Set the HTTP Status Code for the most recent request
      *
      *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
@@ -204,6 +209,7 @@ class Weather_Source_API {
 
 
     /**
+     *
      *  Get the HTTP Response Message for a givin HTTP Response Code
      *
      *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
@@ -261,27 +267,5 @@ class Weather_Source_API {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ?>

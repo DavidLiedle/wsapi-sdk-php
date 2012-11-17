@@ -1,9 +1,10 @@
 <?php
 
 /**
+ *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since v1
+ * @since Version 1.1
  *
  */
 
