@@ -9,7 +9,7 @@
  * @api
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @version 1.3
+ * @version 1.4
  *
  */
 class Weather_Source_API {
@@ -22,6 +22,8 @@ class Weather_Source_API {
         $key,
         $return_diagnostics,
         $suppress_response_codes,
+        $distance_unit,
+        $temperature_unit,
         $log_errors,
         $error_log_directory,
         $request_retry_count,
@@ -31,7 +33,19 @@ class Weather_Source_API {
         $root_directory,
         $response_code,
         $error_message,
-        $is_ok = FALSE;
+        $is_ok = FALSE,
+
+        // stores
+        $inch_fields       = array( 'precip', 'precipMax', 'precipAvg', 'precipMin',
+                                    'snowfall', 'snowfallMax', 'snowfallAvg', 'snowfallMin' ),
+        $mph_fields        = array( 'windSpd', 'windSpdMax', 'windSpdAvg', 'windSpdMin', 'prevailWindSpd' ),
+        $fahrenheit_fields = array( 'temp', 'tempMax', 'tempAvg', 'tempMin',
+                                    'dewPt', 'dewPtMax', 'dewPtAvg', 'dewPtMin',
+                                    'feelsLike', 'feelsLikeMax', 'feelsLikeAvg', 'feelsLikeMin',
+                                    'wetBulb', 'wetBulbMax', 'wetBulbAvg', 'wetBulbMin' ),
+        $inch_keys,        // flipped $inch_fields for efficient lookups
+        $mph_keys,         // flipped $mph_fields for efficient lookups
+        $fahrenheit_keys;  // flipped $fahrenheit_fields for efficient lookups
 
 
     /**
@@ -53,11 +67,17 @@ class Weather_Source_API {
         $this->version                 = defined('WSAPI_VERSION') ? (string) WSAPI_VERSION : 'v1';
         $this->key                     = defined('WSAPI_KEY') ? (string) WSAPI_KEY : '';
         $this->return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
-        $this->suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES  : FALSE;
+        $this->suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES : FALSE;
+        $this->distance_unit           = defined('WSAPI_DISTANCE_UNIT') ? (boolean) WSAPI_DISTANCE_UNIT : 'imperial';
+        $this->temperature_unit        = defined('WSAPI_TEMPERATURE_UNIT') ? (boolean) WSAPI_TEMPERATURE_UNIT : 'fahrenheit';
         $this->log_errors              = defined('WSAPI_LOG_ERRORS') ? (boolean) WSAPI_LOG_ERRORS : FALSE;
         $this->error_log_directory     = defined('WSAPI_ERROR_LOG_DIRECTORY') ? (string) WSAPI_ERROR_LOG_DIRECTORY : 'error_logs/';
         $this->request_retry_count     = defined('WSAPI_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSAPI_REQUEST_RETRY_ON_ERROR_COUNT : 5;
         $this->request_retry_delay     = defined('WSAPI_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSAPI_REQUEST_RETRY_ON_ERROR_DELAY : 2;
+
+        $this->inch_keys       = array_flip($this->inch_fields);
+        $this->mph_keys        = array_flip($this->inch_fields);
+        $this->fahrenheit_keys = array_flip($this->inch_fields);
     }
 
 
@@ -72,7 +92,6 @@ class Weather_Source_API {
      *  @return string  The API response
      */
     public function request( $method, $resource_path, $parameters ) {
-
 
         /*  reset  response_code and error_message  */
         $this->set_response_code( NULL );
@@ -167,9 +186,10 @@ class Weather_Source_API {
      *
      *  Return the current status
      *
-     *  @return  boolean  TRUE if current status is not in error, FALSE otherwise.
+     *  @return boolean  TRUE if current status is not in error, FALSE otherwise.
      */
     public function is_ok() {
+
         return $this->is_ok;
     }
 
@@ -178,9 +198,10 @@ class Weather_Source_API {
      *
      *  Return the HTTP Status Code for the most recent request
      *
-     *  @return  integer  the HTTP Status Code for the most recent request (NULL if no previous request)
+     *  @return integer  the HTTP Status Code for the most recent request (NULL if no previous request)
      */
     public function get_response_code() {
+
         return $this->response_code;
     }
 
@@ -189,9 +210,10 @@ class Weather_Source_API {
      *
      *  Return the error message for the most recent request
      *
-     *  @return  string  error message for most recent request (NULL if no error)
+     *  @return string  error message for most recent request (NULL if no error)
      */
     public function get_error_message() {
+
         return $this->error_message;
     }
 
@@ -205,6 +227,7 @@ class Weather_Source_API {
      *  @return NULL
      */
     protected function set_is_ok( $is_ok ) {
+
         $this->is_ok = $is_ok;
     }
 
@@ -218,6 +241,7 @@ class Weather_Source_API {
      *  @return NULL
      */
     protected function set_response_code( $response_code ) {
+
         $this->response_code = $response_code;
         $this->set_is_ok( $response_code == 200 );
     }
@@ -232,6 +256,7 @@ class Weather_Source_API {
      *  @return NULL
      */
     protected function set_error_message( $error_message ) {
+
         $this->error_message = $error_message;
     }
 
@@ -258,7 +283,6 @@ class Weather_Source_API {
                 // this is a relative path
                 $error_log_directory = $this->root_directory . $error_log_directory;
             }
-echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
 
             // make sure the error log directory exists
             if( !is_dir($error_log_directory) ) {
@@ -282,7 +306,7 @@ echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
      *
      *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
      *
-     *  @return string HTTP Response Message
+     *  @return string   HTTP Response Message
      */
     private function http_response_message( $response_code ) {
 
@@ -341,7 +365,7 @@ echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
      *  @param  integer  $json_response  REQUIRED  The JSON formatted response
      *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
      *
-     *  @return array response updated with absent error messages
+     *  @return array    response updated with absent error messages
      */
     private function process_response( $json_response, $response_code ) {
 
@@ -349,6 +373,7 @@ echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
 
         $response = is_array($response) ? $response : array();
 
+        // backfill any missing error messages
         if( $response_code != 200 ) {
 
             if( $this->return_diagnostics ) {
@@ -374,10 +399,94 @@ echo "<pre>\$error_log_directory = {$error_log_directory}</pre>";
             }
         }
 
+        // convert response if user has specified alternate scales (i.e. metric or celsius)
+        $response = $this->scale_response( $response );
+
         return $response;
     }
 
+    /**
+     *
+     *  Convert to preferred scales
+     *
+     *  @param  array  $response  REQUIRED  The response array
+     *
+     *  @return array  converted response
+     *
+     */
+    private function scale_response( $response ) {
 
+        if( $this->distance_unit == 'metric' || $this->temperature_unit == 'celsius' ) {
+            array_walk_recursive( $response, array($this, 'scale_value') );
+        }
+
+        return $response;
+    }
+
+    /**
+     *
+     *  Scale individual values (this is a callback function for array_walk_recursive)
+     *
+     *  @param  array  $response  REQUIRED  The response array
+     *  @param  array  $response  REQUIRED  The response array
+     *
+     *  @return array  converted response
+     *
+     */
+    private function scale_value( &$value, &$key ) {
+
+        if( is_numeric($value) ) {
+            if( isset($this->inch_keys[$key]) && $this->distance_unit == 'metric' ) {
+                $value = $this->convert_inches_to_centimeters($value);
+            } elseif( isset($this->mph_keys[$key]) && $this->distance_unit == 'metric' ) {
+                $value = $this->convert_mph_to_kmph($value);
+            } elseif( isset($this->fahrenheit_keys[$key]) && $this->temperature_unit == 'celsius' ) {
+                $value = $this->convert_fahrenheit_to_celsius($value);
+            }
+        }
+    }
+
+    /**
+     *
+     *  Convert inches to centimeters
+     *
+     *  @param  float  $inches  REQUIRED
+     *
+     *  @return float  centimeter conversion value
+     *
+     */
+    private function convert_inches_to_centimeters( $inches ) {
+
+        return round( $inches * 2.54, 2 );
+    }
+
+    /**
+     *
+     *  Convert mph to km/hour
+     *
+     *  @param  float  $mph  REQUIRED
+     *
+     *  @return float  km/hour conversion value
+     *
+     */
+    private function convert_mph_to_kmph( $mph ) {
+
+        return round( $mph * 1.60934, 1 );
+    }
+
+    /**
+     *
+     *  Convert degrees fahrenheit to degrees celsius
+     *
+     *  @param  float  $fahrenheit  REQUIRED
+     *
+     *  @return float  celsius conversion value
+     *
+     */
+    private function convert_fahrenheit_to_celsius( $fahrenheit ) {
+
+        return round( (($fahrenheit-32)*5)/9, 1 );
+    }
 
 }
 

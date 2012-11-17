@@ -4,7 +4,7 @@
  *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 1.3
+ * @since Version 1.4
  *
  */
 
@@ -39,6 +39,22 @@ define('WSAPI_RETURN_DIAGNOSTICS', FALSE );
 // TYPE: boolean
 // DEFAULT: FALSE
 define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
+
+// Return imperial or metric distance measures?
+// 		imperial | metric
+// 		---------+------------
+// 		inches   | centimeters
+// 		miles/hr | km/hr
+// TYPE: string
+// ALLOWED: 'imperial', 'metric'
+// DEFAULT: 'imperial'
+define('WSAPI_DISTANCE_UNIT', 'imperial' );
+
+// Return fahrenheit or celsius distance measures?
+// TYPE: string
+// ALLOWED: 'fahrenheit', 'celsius'
+// DEFAULT: 'fahrenheit'
+define('WSAPI_TEMPERATURE_UNIT', 'fahrenheit' );
 
 // Should all errors be written to a log file?
 // TYPE: boolean
