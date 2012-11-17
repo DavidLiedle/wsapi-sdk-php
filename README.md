@@ -1,5 +1,5 @@
-PHP SDK for the Weather Source API
-==================================
+PHP SDK for the Weather Source API Version 1.2
+==============================================
 
 
 
@@ -12,6 +12,8 @@ Installation
 3. Update api.weathersource.sdk/sdk/config.php with your credentials and preferences
 4. Include api.weathersource.sdk/sdk/weathersource_api.sdk.php in your application
 5. Use the SDK at will
+
+To acquire valid credentials, please contact Dave Smith at <dave@weathersource.com>.  Eventually, you will be able to sign up for an API account directly at <http://weathersource.com>, but this is not currently available.
 
 
 
