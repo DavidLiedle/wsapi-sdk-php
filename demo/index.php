@@ -11,7 +11,7 @@
 
 /*  initiate our API class instance  */
 
-require_once( __DIR__ . '/../sdk/weather_source_api.sdk.php' );
+require_once( __DIR__ . '/../sdk/weathersource_api.sdk.php' );
 
 $api = new Weather_Source_API( $return_diagnostics = FALSE, $suppress_response_codes = FALSE );
 
@@ -31,11 +31,20 @@ $request_parameters = array(
 
 /*  make API request  */
 
-$json_response = $api->request( $request_method, $request_path, $request_parameters );
+$response = $api->request( $request_method, $request_path, $request_parameters );
 
 
 /*  do something with the response  */
 
-print_r( json_decode($json_response, TRUE) );
+if( !$api->is_ok() ) {
+	echo "<p>";
+	echo "<strong>ERROR " . $api->get_response_code() . "</strong><br />";
+	echo $api->get_error_message();
+	echo "</p>";
+}
+
+echo "<pre>\$response = ";
+print_r( $response );
+echo "</pre>";
 
 ?>

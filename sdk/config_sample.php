@@ -30,6 +30,16 @@ define('WSAPI_BASE_URI', 'https://api.weathersource.com' );
 // DEFAULT: 'v1'
 define('WSAPI_VERSION', 'v1'  );
 
+// Return diagnostic information with response?
+// TYPE: boolean
+// DEFAULT: FALSE
+define('WSAPI_RETURN_DIAGNOSTICS', FALSE );
+
+// Suppress all HTTP response codes (i.e. force a 200 response)?
+// TYPE: boolean
+// DEFAULT: FALSE
+define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
+
 // Should all errors be written to a log file?
 // TYPE: boolean
 // DEFAULT: FALSE

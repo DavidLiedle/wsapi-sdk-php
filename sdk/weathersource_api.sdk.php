@@ -29,15 +29,14 @@ class Weather_Source_API {
 
         // properties
         $root_directory,
-        $response_code;
+        $response_code,
+        $error_message,
+        $is_ok;
 
 
     /**
      *
      *  Initiate our class instance
-     *
-     *  @param boolean $return_diagnostics       OPTIONAL  Return diagnostic information with the response?
-     *  @param boolean $suppress_response_codes  OPTIONAL  Suppress error codes and always return a 200 HTTP response?
      *
      *  @return NULL
      */
@@ -53,6 +52,8 @@ class Weather_Source_API {
         $this->base_uri                = defined('WSAPI_BASE_URI') ? (string) WSAPI_BASE_URI : 'https://api.weathersource.com';
         $this->version                 = defined('WSAPI_VERSION') ? (string) WSAPI_VERSION : 'v1';
         $this->key                     = defined('WSAPI_KEY') ? (string) WSAPI_KEY : '';
+        $this->return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
+        $this->suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES  : FALSE;
         $this->log_errors              = defined('WSAPI_LOG_ERRORS') ? (boolean) WSAPI_LOG_ERRORS : FALSE;
         $this->error_log_directory     = defined('WSAPI_ERROR_LOG_DIRECTORY') ? (string) WSAPI_ERROR_LOG_DIRECTORY : '/error_logs/';
         $this->request_retry_count     = defined('WSAPI_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSAPI_REQUEST_RETRY_ON_ERROR_COUNT : 5;
@@ -67,12 +68,15 @@ class Weather_Source_API {
      *  @param  string  $method          REQUIRED  The HTTP method for the request (allowed: 'GET', 'POST', 'PUT', 'DELETE')
      *  @param  string  $resource_path   REQUIRED  The resource path for the request (i.e. 'history_by_postal_code')
      *  @param  array   $parameters      REQUIRED  The resource parameters
-     *  @param  string  $format          OPTIONAL  Defaults to 'JSON' (allowed: 'JSON')
-     *  @param  string  $jsonp_callback  OPTIONAL  A JSONP callback function. Defaults to NULL.
      *
      *  @return string  The API response
      */
-    public function request( $method, $resource_path, $parameters, $format = 'JSON', $jsonp_callback = NULL ) {
+    public function request( $method, $resource_path, $parameters ) {
+
+
+        /*  reset  response_code and error_message  */
+        $this->set_response_code( NULL );
+        $this->set_error_message( NULL );
 
 
         /*  append meta parameters  */
@@ -87,10 +91,6 @@ class Weather_Source_API {
             $parameters['_suppress_response_codes'] = '1';
         }
 
-        if( $jsonp_callback ) {
-            $parameters['_callback'] = $jsonp_callback;
-        }
-
 
         /*  open connection  */
 
@@ -99,7 +99,7 @@ class Weather_Source_API {
 
         /*  set the url, number of POST vars, POST data  */
 
-        $uri = $this->base_uri . '/' . $this->version . '/' . $this->key . '/' . $resource_path . '.' . strtolower($format);
+        $uri = $this->base_uri . '/' . $this->version . '/' . $this->key . '/' . $resource_path . '.json';
         curl_setopt( $ch, CURLOPT_URL, $uri );
         curl_setopt( $ch, CURLOPT_POST, count($parameters) );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($parameters) );
@@ -110,7 +110,7 @@ class Weather_Source_API {
 
         for( $i=0; $i < $this->request_retry_count; $i++ ) {
 
-            $response = curl_exec($ch);
+            $json_response = curl_exec($ch);
 
             $response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -122,8 +122,26 @@ class Weather_Source_API {
         }
 
 
+        /*  process $json_response  */
+
+        $response = $this->process_response( $json_response, $response_code );
+
+
         /*  set response code  */
+
         $this->set_response_code( $response_code );
+
+
+        /*  set error message  */
+
+        if( !$this->is_ok() ) {
+            if( $this->return_diagnostics ) {
+                $error_message = $response['response']['message'];
+            } else {
+                $error_message = $response['message'];
+            }
+            $this->set_error_message( $error_message );
+        }
 
 
         /*  close connection  */
@@ -135,13 +153,24 @@ class Weather_Source_API {
 
         if( $response_code != 200 && $this->log_errors === TRUE ) {
             $request_uri = $uri . http_build_query($parameters);
-            $this->write_to_error_log( $request_uri, $response_code, $response, $format, $jsonp_callback );
+            $this->write_to_error_log( $request_uri, $response_code, $response );
         }
 
 
         /*  return response  */
 
         return $response;
+    }
+
+
+    /**
+     *
+     *  Return the current status
+     *
+     *  @return  boolean  TRUE if current status is not in error, FALSE otherwise.
+     */
+    public function is_ok() {
+        return $this->is_ok;
     }
 
 
@@ -158,14 +187,25 @@ class Weather_Source_API {
 
     /**
      *
-     *  Set the HTTP Status Code for the most recent request
+     *  Return the error message for the most recent request
      *
-     *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
+     *  @return  string  error message for most recent request (NULL if no error)
+     */
+    public function get_error_message() {
+        return $this->error_message;
+    }
+
+
+    /**
+     *
+     *  Set the error message for the most recent request
+     *
+     *  @param  bookean  $is_ok  REQUIRED  If the current status is not in error: TRUE. Otherwise FALSE.
      *
      *  @return NULL
      */
-    protected function set_response_code( $response_code ) {
-        $this->response_code = $response_code;
+    protected function set_is_ok( $is_ok ) {
+        $this->is_ok = $is_ok;
     }
 
 
@@ -177,15 +217,45 @@ class Weather_Source_API {
      *
      *  @return NULL
      */
-    protected function write_to_error_log( $request_uri, $response_code, $response, $format, $jsonp_callback ) {
+    protected function set_response_code( $response_code ) {
+        $this->response_code = $response_code;
+        $this->set_is_ok( $response_code == 200 );
+    }
+
+
+    /**
+     *
+     *  Set the error message for the most recent request
+     *
+     *  @param  string  $error_message  REQUIRED  The error message for most recent request (NULL if no error)
+     *
+     *  @return NULL
+     */
+    protected function set_error_message( $error_message ) {
+        $this->error_message = $error_message;
+    }
+
+
+    /**
+     *
+     *  Set the HTTP Status Code for the most recent request
+     *
+     *  @param  integer  $response_code  REQUIRED  The HTTP Status Code for most recent request
+     *
+     *  @return NULL
+     */
+    protected function write_to_error_log( $request_uri, $response_code, $response ) {
 
         // get the current timestamp
         $timestamp = date('c');
 
         // get the http response message
-        $response_arr = json_decode($response, TRUE);
-        if( is_array($response_arr) && !empty( $response_arr['message'] ) ) {
-            $http_response_message = $response_arr['message'];
+        if( is_array($response) && ( ( !$this->return_diagnostics && !empty($response_arr['message']) ) || ( $this->return_diagnostics && !empty($response_arr['response']['message']) ) ) ) {
+            if( $this->return_diagnostics ) {
+                $http_response_message = $response_arr['response']['message'];
+            } else {
+                $http_response_message = $response_arr['message'];
+            }
         } else {
             $http_response_message = $this->http_response_message($response_code);
         }
@@ -206,7 +276,6 @@ class Weather_Source_API {
         $file_pointer = fopen($error_log_filename, 'a+');
         fwrite($file_pointer, $error_message);
         fclose($file_pointer);
-
     }
 
 
@@ -221,7 +290,7 @@ class Weather_Source_API {
     private function http_response_message( $response_code ) {
 
         if( !is_null($response_code) ) {
-            switch ($code) {
+            switch ($response_code) {
                 case 100: $text = 'Continue'; break;
                 case 101: $text = 'Switching Protocols'; break;
                 case 200: $text = 'OK'; break;
@@ -267,6 +336,51 @@ class Weather_Source_API {
 
         return $text;
     }
+
+    /**
+     *
+     *  Process a JSON formatted response into a PHP array updated with absent error messages
+     *
+     *  @param  integer  $json_response  REQUIRED  The JSON formatted response
+     *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
+     *
+     *  @return array response updated with absent error messages
+     */
+    private function process_response( $json_response, $response_code ) {
+
+        $response = json_decode($json_response, TRUE);
+
+        $response = is_array($response) ? $response : array();
+
+        if( $response_code != 200 ) {
+
+            if( $this->return_diagnostics ) {
+                if( !isset($response['diagnostics']) ) {
+                    $response['diagnostics'] = array();
+                }
+                if( !isset($response['response']) ) {
+                    $response['response'] = array();
+                }
+                if( !isset($response['response']['response_code']) ) {
+                    $response['response']['response_code'] = $response_code;
+                }
+                if( !isset($response['response']['message']) ) {
+                    $response['response']['message'] = $this->http_response_message( $response_code );
+                }
+            } else {
+                if( !isset($response['response_code']) ) {
+                    $response['response_code'] = $response_code;
+                }
+                if( !isset($response['message']) ) {
+                    $response['message'] = $this->http_response_message( $response_code );
+                }
+            }
+        }
+
+        return $response;
+    }
+
+
 
 }
 
