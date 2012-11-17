@@ -31,7 +31,7 @@ class Weather_Source_API {
         $root_directory,
         $response_code,
         $error_message,
-        $is_ok;
+        $is_ok = FALSE;
 
 
     /**

@@ -72,7 +72,7 @@ Use of the `request()` method may look like this:
 
 The `is_ok()` method has no parameters.
 
-The `is_ok()` method will return TRUE if the previous request returned a 200 HTTP response code.
+The `is_ok()` method will return TRUE if the previous request returned a 200 HTTP response code, FALSE otherwise.
 
 Use of the `is_ok()` method may look like this:
 
@@ -86,7 +86,7 @@ Use of the `is_ok()` method may look like this:
 
 The `get_response_code()` method has no parameters.
 
-The `get_response_code()` method will return TRUE if the previous request returned a 200 HTTP response code.
+The `get_response_code()` method will return the HTTP response code for the previous request as an integer, NULL when there is not a previous request.
 
 Use of the `get_response_code()` method may look like this:
 
@@ -99,7 +99,7 @@ Use of the `get_response_code()` method may look like this:
 
 The `get_error_message()` method has no parameters.
 
-The `get_error_message()` method will return TRUE if the previous request returned a 200 HTTP response code.
+The `get_error_message()` method will return the error message for the previous request as a string, NULL when not in error state.
 
 Use of the `get_error_message()` method may look like this:
 
