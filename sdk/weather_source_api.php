@@ -152,7 +152,7 @@ class Weather_Source_API {
         /*  write to error log if appropriate  */
 
         if( $response_code != 200 && $this->log_errors === TRUE ) {
-            $request_uri = $uri . http_build_query($parameters);
+            $request_uri = $uri . '?' . http_build_query($parameters);
             $this->write_to_error_log( $request_uri, $response_code, $response );
         }
 
@@ -271,7 +271,7 @@ class Weather_Source_API {
             mkdir($error_log_directory);
         }
 
-        $error_log_filename = $error_log_directory . 'wsapi_errors.log';
+        $error_log_filename = $error_log_directory . 'wsapi_errors_' . date('Ymd') . '.log';
 
         $file_pointer = fopen($error_log_filename, 'a+');
         fwrite($file_pointer, $error_message);
