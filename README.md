@@ -47,7 +47,7 @@ The `request()` method accepts 3 parameters:
 2. $resource_path   (string)  REQUIRED  The resource path for the request (i.e. 'history_by_postal_code')
 3. $parameters      (array)   REQUIRED  The resource parameters
 
-See the [API documentation](http://develpoer.weathersource.com/) to determine the values for these parameters that will meet your need.
+See the [API documentation](http://developer.weathersource.com/) to determine the values for these parameters that will meet your need.
 
 The `request()` method will return a PHP array with the requested response.
 
