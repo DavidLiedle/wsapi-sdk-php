@@ -117,6 +117,8 @@ class Weather_Source_API {
             if( !in_array($response_code, array(500,502,503,504)) ) {
                 break;
             }
+
+            sleep($this->request_retry_delay);
         }
 
 
