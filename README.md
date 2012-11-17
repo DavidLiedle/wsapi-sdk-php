@@ -23,7 +23,7 @@ Weather_Source_API class
 
 Instantiating the Weather_Source_API class is as easy as this:
 
-    include_once('path_to/api.weathersource.sdk/sdk/weathersource_api.sdk.php');
+    include_once('/path/to/api.weathersource.sdk/sdk/weathersource_api.sdk.php');
     $sdk = new Weather_Source_API;
 
 
