@@ -65,7 +65,7 @@ define('WSAPI_LOG_ERRORS', FALSE );
 //     otherwise, it is treated as relative to the api.weathersource.sdk/sdk directory.
 // TYPE: string
 // DEFAULT: 'error_logs/'
-define('WSAPI_ERROR_LOG_DIRECTORY', 'error_logs/'  );
+define('WSAPI_ERROR_LOG_DIRECTORY', 'error_logs/' );
 
 // The number of times to retry a request that returns a non-user caused error.
 // TYPE: integer
