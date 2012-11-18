@@ -61,8 +61,8 @@ define('WSAPI_TEMPERATURE_UNIT', 'fahrenheit' );
 // DEFAULT: FALSE
 define('WSAPI_LOG_ERRORS', FALSE );
 
-// Log file directory location. Any path beginning beginning with '/' are considered absolute,
-//     otherwise, it is considered relative to the api.weathersource.sdk/sdk directory.
+// Log file directory location. A path beginning beginning with '/' is considered absolute,
+//     otherwise, it is treated as relative to the api.weathersource.sdk/sdk directory.
 // TYPE: string
 // DEFAULT: 'error_logs/'
 define('WSAPI_ERROR_LOG_DIRECTORY', 'error_logs/'  );
