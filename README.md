@@ -29,9 +29,9 @@ Instantiating the Weather_Source_API class is as easy as this:
 With the proper options set in api.weathersource.sdk/sdk/config.php, this class can:
 
 1. Retry requests N times until success
-2. Log all errors
-3. Convert appropriate results to metric values
-4. Convert appropriate results to Celsius values
+2. Log errors to specified directory
+3. Convert imperial measurement results to metric values
+4. Convert Fahrenheit results to Celsius values
 5. Suppress HTTP error codes
 6. Return diagnostic information with responses
 
