@@ -26,6 +26,14 @@ Instantiating the Weather_Source_API class is as easy as this:
     include_once('/path/to/api.weathersource.sdk/sdk/weathersource_api.sdk.php');
     $sdk = new Weather_Source_API;
 
+With the proper options set in api.weathersource.sdk/sdk/config.php, this class can:
+
+1. Retry requests N times until success
+2. Log all errors
+3. Convert appropriate results to metric values
+4. Convert appropriate results to Celsius values
+5. Suppress HTTP error codes
+6. Return diagnostic information with responses
 
 
 
