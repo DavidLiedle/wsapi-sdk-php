@@ -4,7 +4,7 @@
  *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 1.2
+ * @since Version 1.4
  *
  */
 
@@ -13,7 +13,7 @@
 
 require_once( __DIR__ . '/../sdk/weather_source_api.php' );
 
-$api = new Weather_Source_API( $return_diagnostics = FALSE, $suppress_response_codes = FALSE );
+$api = new Weather_Source_API;
 
 
 /*  set request variables  */
