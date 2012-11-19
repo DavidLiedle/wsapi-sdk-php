@@ -25,7 +25,7 @@ $request_parameters = array(
                           'postal_code_eq'    => '22222',
                           'country_eq'        => 'US',
                           'timestamp_between' => '2011-01-01,2011-01-05',
-                          'fields'            => 'tempMax',
+                          'fields'            => 'tempMax,tempAvg,tempMin',
                       );
 
 
