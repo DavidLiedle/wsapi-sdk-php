@@ -346,10 +346,10 @@ class Weather_Source_API {
                 case 503: $text = 'Service Unavailable'; break;
                 case 504: $text = 'Gateway Time-out'; break;
                 case 505: $text = 'HTTP Version not supported'; break;
-                default:  $text = 'Unknown status'; break;
+                default:  $text = 'Unknown status. Verify config.php is properly configured and WSAPI_BASE_URI is a valid URI.'; break;
             }
         } else {
-            $text = 'Unknown status';
+            $text = 'Unknown status. Please verify config.php is properly configured and WSAPI_BASE_URI is a valid URI.';
         }
 
         return $text;
