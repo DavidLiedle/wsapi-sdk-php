@@ -54,10 +54,7 @@ class Weather_Source_API {
      *
      *  @return NULL
      */
-    public function __construct( $return_diagnostics = FALSE, $suppress_response_codes = FALSE ) {
-
-        $this->return_diagnostics      = $return_diagnostics;
-        $this->suppress_response_codes = $suppress_response_codes;
+    public function __construct() {
 
         $this->root_directory          = (__DIR__ == '/') ? __DIR__ : __DIR__.'/';
 
