@@ -9,7 +9,7 @@
  * @api
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @version 1.4
+ * @version 1.5
  *
  */
 class Weather_Source_API {
@@ -32,7 +32,7 @@ class Weather_Source_API {
         // properties
         $root_directory,
         $response_code,
-        $error_message,
+        $error_message = '',
         $is_ok = FALSE,
 
         // stores
@@ -118,19 +118,21 @@ class Weather_Source_API {
         $uri = $this->base_uri . '/' . $this->version . '/' . $this->key . '/' . $resource_path . '.json';
         curl_setopt( $ch, CURLOPT_URL, $uri );
         curl_setopt( $ch, CURLOPT_POST, count($parameters) );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($parameters) );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($parameters, '', '&') );
+        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 5 );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 60 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
-
 
         /*  execute post  */
 
         for( $i=0; $i < $this->request_retry_count; $i++ ) {
 
             $json_response = curl_exec($ch);
-
             $response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_error    = curl_error($ch);
+            $curl_error    = !empty($curl_error) ? ': ' . $curl_error : '';
 
-            if( !in_array($response_code, array(500,502,503,504)) ) {
+            if( !in_array($response_code, array(0,500,502,503,504)) ) {
                 break;
             }
 
@@ -145,7 +147,7 @@ class Weather_Source_API {
 
         /*  process $json_response  */
 
-        $response = $this->process_response( $json_response, $response_code );
+        $response = $this->process_response( $json_response, $response_code, $curl_error );
 
 
         /*  set response code  */
@@ -163,7 +165,6 @@ class Weather_Source_API {
             }
             $this->set_error_message( $error_message );
         }
-
 
         /*  write to error log if appropriate  */
 
@@ -302,13 +303,15 @@ class Weather_Source_API {
      *  Get the HTTP Response Message for a givin HTTP Response Code
      *
      *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
+     *  @param  string   $curl_error     OPTIONAL  The text of the cURL error when $response_code == 0
      *
      *  @return string   HTTP Response Message
      */
-    private function http_response_message( $response_code ) {
+    private function http_response_message( $response_code, $curl_error = '' ) {
 
         if( !is_null($response_code) ) {
             switch ($response_code) {
+                case 0:   $text = 'Connection Error' . $curl_error; break;
                 case 100: $text = 'Continue'; break;
                 case 101: $text = 'Switching Protocols'; break;
                 case 200: $text = 'OK'; break;
@@ -346,10 +349,10 @@ class Weather_Source_API {
                 case 503: $text = 'Service Unavailable'; break;
                 case 504: $text = 'Gateway Time-out'; break;
                 case 505: $text = 'HTTP Version not supported'; break;
-                default:  $text = 'Unknown status. Verify config.php is properly configured and WSAPI_BASE_URI is a valid URI.'; break;
+                default:  $text = 'Unknown status'; break;
             }
         } else {
-            $text = 'Unknown status. Please verify config.php is properly configured and WSAPI_BASE_URI is a valid URI.';
+            $text = 'Unknown status'; break;
         }
 
         return $text;
@@ -361,10 +364,11 @@ class Weather_Source_API {
      *
      *  @param  integer  $json_response  REQUIRED  The JSON formatted response
      *  @param  integer  $response_code  REQUIRED  The HTTP Response Code for most recent request
+     *  @param  string   $curl_error     OPTIONAL  The text of the cURL error when $response_code == 0
      *
      *  @return array    response updated with absent error messages
      */
-    private function process_response( $json_response, $response_code ) {
+    private function process_response( $json_response, $response_code, $curl_error = '' ) {
 
         $response = json_decode($json_response, TRUE);
 
@@ -384,14 +388,14 @@ class Weather_Source_API {
                     $response['response']['response_code'] = $response_code;
                 }
                 if( !isset($response['response']['message']) ) {
-                    $response['response']['message'] = $this->http_response_message( $response_code );
+                    $response['response']['message'] = $this->http_response_message( $response_code, $curl_error );
                 }
             } else {
                 if( !isset($response['response_code']) ) {
                     $response['response_code'] = $response_code;
                 }
                 if( !isset($response['message']) ) {
-                    $response['message'] = $this->http_response_message( $response_code );
+                    $response['message'] = $this->http_response_message( $response_code, $curl_error );
                 }
             }
         }

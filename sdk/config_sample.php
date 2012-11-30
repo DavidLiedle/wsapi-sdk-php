@@ -45,12 +45,14 @@ define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
 // 		---------+------------
 // 		inches   | centimeters
 // 		miles/hr | km/hr
+// NOTE: Will only translate responses from the API. All writes must be per the API spec.
 // TYPE: string
 // ALLOWED: 'imperial', 'metric'
 // DEFAULT: 'imperial'
 define('WSAPI_DISTANCE_UNIT', 'imperial' );
 
 // Return fahrenheit or celsius distance measures?
+// NOTE: Will only translate responses from the API. All writes must be per the API spec.
 // TYPE: string
 // ALLOWED: 'fahrenheit', 'celsius'
 // DEFAULT: 'fahrenheit'
