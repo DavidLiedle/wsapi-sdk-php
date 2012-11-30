@@ -1,5 +1,12 @@
-PHP SDK for the Weather Source API Version 1.4
+PHP SDK for the Weather Source API Version 1.5
 ==============================================
+
+
+
+Requirements
+------------
+
+Requires PHP version 5.3.0 or greater.
 
 
 
@@ -14,7 +21,6 @@ Installation
 5. Use the SDK at will
 
 To acquire valid credentials, please contact Dave Smith at <dave@weathersource.com>.  Eventually, you will be able to sign up for an API account directly at <http://weathersource.com>, but this is not currently available.
-
 
 
 

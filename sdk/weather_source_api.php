@@ -6,6 +6,9 @@
  *
  * Requires PHP version 5.3.0 or greater
  *
+ * TODO: If suppress errors is on, we need to check the response for an error code and
+ *       grab the error number and text for logging purposes.
+ *
  * @api
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
