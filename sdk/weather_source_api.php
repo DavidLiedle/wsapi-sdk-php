@@ -122,9 +122,11 @@ class Weather_Source_API {
         curl_setopt( $ch, CURLOPT_URL, $uri );
         curl_setopt( $ch, CURLOPT_POST, count($parameters) );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($parameters, '', '&') );
-        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 5 );
-        curl_setopt( $ch, CURLOPT_TIMEOUT, 60 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 60 );
+        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 5 );
+        curl_setopt( $ch, CURLOPT_DNS_CACHE_TIMEOUT, 15 );
+        curl_setopt( $ch, CURLOPT_DNS_USE_GLOBAL_CACHE, FALSE );
 
         /*  execute post  */
 
@@ -273,6 +275,12 @@ class Weather_Source_API {
     protected function write_to_error_log( $request_uri ) {
 
         if( !$this->is_ok() ) {
+
+            // modify $request_uri to more readable format
+            $request_uri = urldecode($request_uri);
+            $request_uri = urldecode($request_uri);
+
+
             // compose our error message
             $timestamp = date('c');
             $error_message = "[{$timestamp}] [Error {$this->response_code} | {$this->error_message}] [{$request_uri}]\r\n";
