@@ -12,7 +12,7 @@
  * @api
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @version 1.5
+ * @version 1.6
  *
  */
 class Weather_Source_API {
