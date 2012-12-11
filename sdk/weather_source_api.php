@@ -223,13 +223,25 @@ class Weather_Source_API {
 
     /**
      *
+     *  Return the error message for the most recent request
+     *
+     *  @return string  path to error log directory
+     */
+    public function get_error_log_directory() {
+
+        return $this->root_directory . $this->error_log_directory;
+    }
+
+
+    /**
+     *
      *  Set the error message for the most recent request
      *
      *  @param  bookean  $is_ok  REQUIRED  If the current status is not in error: TRUE. Otherwise FALSE.
      *
      *  @return NULL
      */
-    protected function set_is_ok( $is_ok ) {
+    private function set_is_ok( $is_ok ) {
 
         $this->is_ok = $is_ok;
     }
@@ -243,7 +255,7 @@ class Weather_Source_API {
      *
      *  @return NULL
      */
-    protected function set_response_code( $response_code ) {
+    private function set_response_code( $response_code ) {
 
         $this->response_code = $response_code;
         $this->set_is_ok( $response_code == 200 );
@@ -258,7 +270,7 @@ class Weather_Source_API {
      *
      *  @return NULL
      */
-    protected function set_error_message( $error_message ) {
+    private function set_error_message( $error_message ) {
 
         $this->error_message = $error_message;
     }
@@ -272,7 +284,7 @@ class Weather_Source_API {
      *
      *  @return NULL
      */
-    protected function write_to_error_log( $request_uri ) {
+    private function write_to_error_log( $request_uri ) {
 
         if( !$this->is_ok() ) {
 
