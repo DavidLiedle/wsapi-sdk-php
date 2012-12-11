@@ -290,7 +290,6 @@ class Weather_Source_API {
 
             // modify $request_uri to more readable format
             $request_uri = urldecode($request_uri);
-            $request_uri = urldecode($request_uri);
 
 
             // compose our error message
