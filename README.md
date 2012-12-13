@@ -70,14 +70,20 @@ You can optionally define a callback function that will process results as they 
 
 Make as many requests as you like. Please reference the API documentation at <http://developer.weathersource.com> for valid request methods, request paths, and request parameters:
 
-    new Weather_Source_API_Request(
+    $request = new Weather_Source_API_Request(
         $request_method     = 'GET',
         $request_path       = 'account',
         $request_parameters = array( 'fields' => 'key,username,first_name,last_name,email' ),
-        $callback_name      = 'user_defined_callback' // optional
+        $callback_name      = 'user_defined_callback'  // optional
     );
 
-We will now wait for the threaded requests to complete, and grab the results of all requests made:
+Using two static methods, we will now wait for the threaded requests to complete, and grab the results of all requests made:
 
     Weather_Source_API_Requests::finish();
     $results = Weather_Source_API_Requests::get_results();
+
+There are also two instance methods at our disposal:
+
+    $request->get_status();  // returns 'queued', 'processing', 'complete', or 'unknown'
+    $request->get_result();  // returns an array containing the request response if the request status is 'complete', FALSE otherwise
+

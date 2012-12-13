@@ -47,6 +47,8 @@ class Weather_Source_API_Requests {
         $mph_keys,         // flipped $mph_fields for efficient lookups
         $fahrenheit_keys;  // flipped $fahrenheit_fields for efficient lookups
 
+    private
+        $curl_node;
 
 
     /**
@@ -123,7 +125,7 @@ class Weather_Source_API_Requests {
             CURLOPT_DNS_USE_GLOBAL_CACHE => FALSE,
         );
 
-        new Curl_Node($url, $opts, array( 'Weather_Source_API_Requests', 'process_result' ), array('callback' => $callback ) );
+        $this->curl_node = new Curl_Node($url, $opts, array( 'Weather_Source_API_Requests', 'process_result' ), array('callback' => $callback ) );
     }
 
 
@@ -137,6 +139,35 @@ class Weather_Source_API_Requests {
     static public function finish() {
 
         Curl_Node::finish();
+    }
+
+
+    /**
+     *
+     *  Get the status of a node associated with the cURL handle $handle
+     *
+     *  @return  string   Possible values: "queued", "processing", "complete", "unknown"
+     *
+    **/
+    public function get_status() {
+
+        return $this->curl_node->get_status();
+    }
+
+
+    /**
+     *
+     *  Get all results from all completed requests
+     *
+     *  @return  If request has completed, returns an associative array containing these keys:
+     *           'response' (string), 'http_code' (string), 'latency' (float), 'url' (string),
+     *           'opts' (array). If request has not completed, returns FALSE
+     *
+    **/
+    public function get_result() {
+
+        $result = $this->curl_node->get_result();
+        return $result['response'];
     }
 
 

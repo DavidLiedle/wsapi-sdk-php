@@ -46,12 +46,15 @@ for($i=0; $i<10; $i++) {
 
     /*  make an API request  */
 
-    new Weather_Source_API_Request(
+    $request = new Weather_Source_API_Request(
         $request_method     = 'GET',
         $request_path       = 'account',
         $request_parameters = array( 'fields' => 'key,username,first_name,last_name,email' ),
         $callback_name      = 'user_defined_callback' // optional
     );
+
+    // $request->get_status() will return 'queued', 'processing', 'complete', or 'unknown'
+    echo "request status = {$request->get_status()}</br>";
 }
 
 
@@ -67,5 +70,15 @@ $results = Weather_Source_API_Requests::get_results();
 echo "<pre>summary \$results = ";
 print_r( $results );
 echo "</pre>";
+
+
+/*  get the last submitted request's result  */
+
+if( 'complete' == $request->get_status() ) {
+    $result = $request->get_result();
+    echo "<pre>last request \$result = ";
+    print_r( $result );
+    echo "</pre>";
+}
 
 ?>

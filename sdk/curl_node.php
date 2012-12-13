@@ -93,6 +93,8 @@ class Curl_Node {
         $retry_delay            = 2,  // seconds to wait before readding node to queue
         $request_interval_delay = 0;  // seconds between launching new threads
 
+    private
+        $handle_string;
 
 
     /**
@@ -116,7 +118,13 @@ class Curl_Node {
         $opts[CURLOPT_RETURNTRANSFER] = 1;
         $opts[CURLOPT_URL]            = $url;
 
-        $node['handle']       = '';
+        $handle = curl_init();
+
+        foreach($opts as $option => $value) {
+            curl_setopt( $handle, $option, $value );
+        }
+
+        $node['handle']       = $handle;
         $node['url']          = $url;
         $node['opts']         = $opts;
         $node['start']        = microtime(TRUE);
@@ -127,9 +135,11 @@ class Curl_Node {
         $node['callback']     = $callback;
         $node['metadata']     = $metadata;
 
-        self::$queue[] = $node;
+        self::$queue[(string) $handle] = $node;
 
         self::request();
+
+        $this->handle_string = (string) $handle;
     }
 
 
@@ -190,6 +200,54 @@ class Curl_Node {
     static public function set_retry_delay($retry_delay) {
 
         self::$retry_delay = $retry_delay;
+    }
+
+
+    /**
+     *
+     *  Get the status of a node associated with the cURL handle $handle
+     *
+     *  @return  string   Possible values: "queued", "processing", "complete", "unknown"
+     *
+    **/
+    public function get_status() {
+
+        if( is_array(self::$results) && isset(self::$results[$this->handle_string]) ) {
+
+            return 'complete';
+
+        } elseif( is_array(self::$nodes) && isset(self::$nodes[$this->handle_string]) ) {
+
+            return 'processing';
+
+        } elseif( is_array(self::$queue) && isset(self::$queue[$this->handle_string]) ) {
+
+            return 'queued';
+        }
+
+        return 'unknown';
+    }
+
+
+    /**
+     *
+     *  Get all results from all completed requests
+     *
+     *  @return  If request has completed, returns an associative array containing these keys:
+     *           'response' (string), 'http_code' (string), 'latency' (float), 'url' (string),
+     *           'opts' (array). If request has not completed, returns FALSE
+     *
+    **/
+    public function get_result() {
+
+        if( isset(self::$results[$this->handle_string]) ) {
+
+            return self::$results[$this->handle_string];
+
+        } else {
+
+            return FALSE;
+        }
     }
 
 
@@ -270,13 +328,8 @@ class Curl_Node {
 
             // add node to $nodes
             $node = array_shift(self::$queue);
-            $node['handle'] = curl_init();
 
-            foreach($node['opts'] as $option => $value) {
-                curl_setopt( $node['handle'], $option, $value );
-            }
-
-            self::$nodes[$node['handle']] = $node;
+            self::$nodes[(string) $node['handle']] = $node;
             curl_multi_add_handle(self::$multi_handle, $node['handle']);
 
             usleep( self::$request_interval_delay / 1000000 );
@@ -322,8 +375,8 @@ class Curl_Node {
 
             $handle   = $info['handle'];
 
-            $node = self::$nodes[$handle];
-            unset(self::$nodes[$handle]);
+            $node = self::$nodes[(string) $handle];
+            unset(self::$nodes[(string) $handle]);
 
             $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
 
@@ -359,7 +412,7 @@ class Curl_Node {
 
                 call_user_func_array( $callback, $callback_params );
 
-                self::$results[] = $node;
+                self::$results[(string) $handle] = $node;
 
                 curl_multi_remove_handle(self::$multi_handle, $handle);
             }
