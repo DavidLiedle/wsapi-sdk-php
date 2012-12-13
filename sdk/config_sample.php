@@ -4,7 +4,7 @@
  *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 1.4
+ * @since Version 2.0
  *
  */
 
@@ -40,6 +40,18 @@ define('WSAPI_RETURN_DIAGNOSTICS', FALSE );
 // DEFAULT: FALSE
 define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
 
+// The delay in seconds before a new thread is launched.
+// TIP: Use this to help avoid throttled requests. Set to: (60 / max_requests_per_minute)
+// TYPE: float
+// DEFAULT: .05
+define('WSSDK_THREAD_LAUNCH_INTERVAL_DELAY', .05 );
+
+// The maximum thread count to allow at any given moment.
+// WARNING: To many threads originating from the same IP address may result in connection errors
+// TYPE: integer
+// DEFAULT: 10
+define('WSSDK_MAX_THREADS', 10 );
+
 // Return imperial or metric distance measures?
 // 		imperial | metric
 // 		---------+------------
@@ -49,35 +61,35 @@ define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
 // TYPE: string
 // ALLOWED: 'imperial', 'metric'
 // DEFAULT: 'imperial'
-define('WSAPI_DISTANCE_UNIT', 'imperial' );
+define('WSSDK_DISTANCE_UNIT', 'imperial' );
 
 // Return fahrenheit or celsius distance measures?
 // NOTE: Will only translate responses from the API. All writes must be per the API spec.
 // TYPE: string
 // ALLOWED: 'fahrenheit', 'celsius'
 // DEFAULT: 'fahrenheit'
-define('WSAPI_TEMPERATURE_UNIT', 'fahrenheit' );
+define('WSSDK_TEMPERATURE_UNIT', 'fahrenheit' );
 
 // Should all errors be written to a log file?
 // TYPE: boolean
 // DEFAULT: FALSE
-define('WSAPI_LOG_ERRORS', FALSE );
+define('WSSDK_LOG_ERRORS', FALSE );
 
 // Log file directory location. A path beginning beginning with '/' is considered absolute,
 //     otherwise, it is treated as relative to the api.weathersource.sdk/sdk directory.
 // TYPE: string
 // DEFAULT: 'error_logs/'
-define('WSAPI_ERROR_LOG_DIRECTORY', 'error_logs/' );
+define('WSSDK_ERROR_LOG_DIRECTORY', 'error_logs/' );
 
 // The number of times to retry a request that returns a non-user caused error.
 // TYPE: integer
 // DEFAULT: 5
-define('WSAPI_REQUEST_RETRY_ON_ERROR_COUNT', 5 );
+define('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT', 5 );
 
-// The delay in seconds before a request that returns a non-user caused error is retries\d.
+// The delay in seconds before a request that returns a non-user caused error is retried.
 // TYPE: integer
 // DEFAULT: 2
-define('WSAPI_REQUEST_RETRY_ON_ERROR_DELAY', 2 );
+define('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY', 2 );
 
 
 ?>
