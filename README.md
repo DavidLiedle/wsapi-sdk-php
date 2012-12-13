@@ -90,6 +90,7 @@ Using two static methods, we will now wait for the threaded requests to complete
 
 There are also two instance methods at our disposal:
 
-    $request_1->get_status();  // returns 'queued', 'processing', 'complete', or 'unknown'
-    $request_1->get_result();  // returns an array containing the request response if the request status is 'complete', FALSE otherwise
+    $status_1 = $request_1->get_status();  // returns 'queued', 'processing', 'complete', or 'unknown'
+    $result_1 = $request_1->get_result();  // returns an array containing the request response if the request status
+                                           // is 'complete', FALSE otherwise
 
