@@ -29,7 +29,7 @@ require_once( __DIR__ . '/../sdk/weather_source_api.php' );
  *  @return  NULL
  *
 **/
-function wsapi_callback( &$result, $http_code, $latency, $url, $opts ) {
+function user_defined_callback( &$result, $http_code, $latency, $url, $opts ) {
     echo "<pre>callback \$result = ";
     print_r( $result );
     echo "</pre>";
@@ -43,22 +43,14 @@ function wsapi_callback( &$result, $http_code, $latency, $url, $opts ) {
 
 for($i=0; $i<10; $i++) {
 
-    /*  set request variables  */
-
-    $request_method     = 'GET';
-    $request_path       = 'account';
-    $request_parameters = array(
-                                'fields' => 'key,username,first_name,last_name,email'
-                          );
-
 
     /*  make an API request  */
 
     new Weather_Source_API_Request(
-        $request_method,
-        $request_path,
-        $request_parameters,
-        'wsapi_callback'
+        $request_method     = 'GET',
+        $request_path       = 'account',
+        $request_parameters = array( 'fields' => 'key,username,first_name,last_name,email' ),
+        $callback_name      = 'user_defined_callback' // optional
     );
 }
 
