@@ -11,7 +11,7 @@
 
 /*  initiate our API class instance  */
 
-require_once( __DIR__ . '/../sdk/weather_source_api.php' );
+require_once( __DIR__ . '/../sdk/weather_source_api_requests.php' );
 
 
 /*  define a callback function to handle requests as they complete  */

@@ -29,7 +29,7 @@ Weather_Source_API_Requests class
 
 Include the class defination:
 
-    include_once('/path/to/api.weathersource.sdk/sdk/weathersource_api.sdk.php');
+    include_once('/path/to/api.weathersource.sdk/sdk/weather_source_api_requests.php');
 
 With the proper options set in api.weathersource.sdk/sdk/config.php, this class can:
 
