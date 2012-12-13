@@ -45,7 +45,7 @@ With the proper options set in api.weathersource.sdk/sdk/config.php, this class 
 Use
 ---
 
-The Weather_Source_API_Requests class (alias: Weather_Source_API_Request) is designed for multithreaded requests. Add as many requests as desired, and they will be processed as thread capacity allows.
+The Weather_Source_API_Requests class (alias: Weather_Source_API_Request) is designed for multithreaded requests. Add multiple requests, and they will be processed as thread capacity allows.
 
 You can optionally define a callback function that will process results as they come available. This will allow processing of results while unprocessed requests continue to complete.
 
