@@ -32,7 +32,7 @@ class Weather_Source_API_Requests {
         $request_retry_count,
         $request_retry_delay,
         $max_threads,
-        $thread_launch_interval_delay,
+        $max_requests_per_minute,
 
 
         // stores
@@ -76,7 +76,7 @@ class Weather_Source_API_Requests {
             self::$return_diagnostics           = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
             self::$suppress_response_codes      = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES : FALSE;
             self::$max_threads                  = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
-            self::$thread_launch_interval_delay = defined('WSSDK_THREAD_LAUNCH_INTERVAL_DELAY') ? (integer) WSSDK_THREAD_LAUNCH_INTERVAL_DELAY : .05;
+            self::$max_requests_per_minute      = defined('WSSDK_MAX_REQUESTS_PER_MINUTE') ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE : 10;
             self::$distance_unit                = defined('WSSDK_DISTANCE_UNIT') ? (boolean) WSSDK_DISTANCE_UNIT : 'imperial';
             self::$temperature_unit             = defined('WSSDK_TEMPERATURE_UNIT') ? (boolean) WSSDK_TEMPERATURE_UNIT : 'fahrenheit';
             self::$log_errors                   = defined('WSSDK_LOG_ERRORS') ? (boolean) WSSDK_LOG_ERRORS : FALSE;
@@ -88,7 +88,7 @@ class Weather_Source_API_Requests {
             self::$mph_keys        = array_flip(self::$mph_fields);
             self::$fahrenheit_keys = array_flip(self::$fahrenheit_fields);
 
-            Curl_Node::set_request_interval_delay(self::$thread_launch_interval_delay);
+            Curl_Node::set_max_requests_per_minute(self::$max_requests_per_minute);
             Curl_Node::set_max_threads(self::$max_threads);
             Curl_Node::set_max_retries(self::$request_retry_count);
             Curl_Node::set_retry_delay(self::$request_retry_delay);
@@ -268,7 +268,7 @@ class Weather_Source_API_Requests {
                 $opts
             );
 
-            if( !empty($metadata['callback']) && ( (is_string($metadata['callback']) && function_exists($metadata['callback'])) || (is_array($metadata['callback']) && !empty($metadata['callback'][0]) && !empty($metadata['callback'][1]) && method_exists($metadata['callback'][0], $metadata['callback'][1])) ) ) {
+            if( !empty($metadata['callback']) && is_callable($metadata['callback']) ) {
                 call_user_func_array( $metadata['callback'], $callback_params );
             }
         }

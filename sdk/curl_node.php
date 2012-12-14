@@ -44,7 +44,7 @@
 #       );
 #
 #       // Pace your requests: add one new thread every .05 seconds
-#       Curl_Node::set_request_interval_delay( .05 );
+#       Curl_Node::set_max_requests_per_minute( .05 );
 #
 #       // Only allow 10 threads at a time
 #       Curl_Node::set_max_threads( 10 );
@@ -89,10 +89,10 @@ class Curl_Node {
         $threads,
         $status,
         $add_nodes_lock,
-        $max_threads            = 1,
-        $max_retries            = 5,
-        $retry_delay            = 2,  // seconds to wait before readding node to queue
-        $request_interval_delay = 1;  // seconds between launching new threads
+        $max_threads             = 1,
+        $max_retries             = 5,
+        $retry_delay             = 2,  // seconds to wait before readding node to queue
+        $max_requests_per_minute = 10;  // seconds between launching new threads
 
     private
         $handle_string;
@@ -163,14 +163,14 @@ class Curl_Node {
      *
      *  Set the number of seconds to wait between launching new threads to managably ramp up requests
      *
-     *  @param   $request_interval_delay  integer  REQUIRED  The interval in seconds between thread launches
+     *  @param   $max_requests_per_minute  integer  REQUIRED  The interval in seconds between thread launches
      *
      *  @return  NULL
      *
     **/
-    static public function set_request_interval_delay( $request_interval_delay ) {
+    static public function set_max_requests_per_minute( $max_requests_per_minute ) {
 
-        self::$request_interval_delay = $request_interval_delay;
+        self::$max_requests_per_minute = $max_requests_per_minute;
     }
 
 
@@ -319,6 +319,7 @@ class Curl_Node {
         }
 
         if( self::$add_nodes_lock !== TRUE ) {
+
             self::$add_nodes_lock = TRUE;
             self::$multi_handle   = empty(self::$multi_handle) ? curl_multi_init() : self::$multi_handle;
             self::$threads        = empty(self::$threads)      ? 0                 : self::$threads;
@@ -335,7 +336,7 @@ class Curl_Node {
                 self::$nodes[(string) $node['handle']] = $node;
                 curl_multi_add_handle(self::$multi_handle, $node['handle']);
 
-                usleep( self::$request_interval_delay / 1000000 );
+                usleep( (60/self::$max_requests_per_minute)*1000000 );
 
                 do {
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
@@ -416,7 +417,7 @@ class Curl_Node {
                     $node['opts']
                 );
 
-                if( !empty($callback) && ( (is_string($callback) && function_exists($callback)) || (is_array($callback) && !empty($callback[0]) && !empty($callback[1]) && method_exists($callback[0], $callback[1])) ) ) {
+                if( !empty($callback) && is_callable($callback) ) {
                     call_user_func_array( $callback, $callback_params );
                 }
 
@@ -430,6 +431,8 @@ class Curl_Node {
 
         if( $processed && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
 
+            // wait for the designated period to make sure we have a window
+            usleep( (60/self::$max_requests_per_minute)*1000000 );
             self::add_nodes();
         }
     }

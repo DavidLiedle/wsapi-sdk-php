@@ -40,11 +40,10 @@ define('WSAPI_RETURN_DIAGNOSTICS', FALSE );
 // DEFAULT: FALSE
 define('WSAPI_SUPPRESS_RESPONSE_CODES', FALSE );
 
-// The delay in seconds before a new thread is launched.
-// TIP: Use this to help avoid throttled requests. Set to: (60 / max_requests_per_minute)
-// TYPE: float
-// DEFAULT: .05
-define('WSSDK_THREAD_LAUNCH_INTERVAL_DELAY', .05 );
+// Pace your requests to live within your subscription plan's minute rate limit.
+// TYPE: integer
+// DEFAULT: 10
+define('WSSDK_MAX_REQUESTS_PER_MINUTE', 10 );
 
 // The maximum thread count to allow at any given moment.
 // WARNING: To many threads originating from the same IP address may result in connection errors
