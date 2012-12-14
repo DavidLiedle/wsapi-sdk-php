@@ -1,11 +1,9 @@
 <?php
 
 /**
- *
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
  * @since Version 2.0
- *
  */
 
 
@@ -17,7 +15,6 @@ require_once( __DIR__ . '/../sdk/weather_source_api_requests.php' );
 /*  define a callback function to handle requests as they complete  */
 
 /**
- *
  *  User defined callback function to process results as individual requests complete
  *
  *  @param   $result     string  The response to the cURL response. Prepend with '&' to pass by reference.
@@ -25,9 +22,7 @@ require_once( __DIR__ . '/../sdk/weather_source_api_requests.php' );
  *  @param   $latency    float   Seconds elapsed since node added accurate to the nearest microsecond
  *  @param   $url        string  User provided URL
  *  @param   $opts       array   The cURL transfer options
- *
  *  @return  NULL
- *
 **/
 function user_defined_callback( &$result, $http_code, $latency, $url, $opts ) {
     echo "<pre>callback \$result = ";

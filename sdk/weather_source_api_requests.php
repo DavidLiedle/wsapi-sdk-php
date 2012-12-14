@@ -1,67 +1,209 @@
 <?php
 
 /**
+ *  Weather Source API PHP SDK
  *
- * Weather Source API PHP SDK
+ *  Requires PHP version 5.3.0 or greater
  *
- * Requires PHP version 5.3.0 or greater
- *
- * TODO: If suppress errors is on, we need to check the response for an error code and
- *       grab the error number and text for logging purposes.
- *
- * @api
- * @author Jeffrey D. King
- * @copyright 2012- Weather Source, LLC
- * @version 2.0
- *
+ *  @author     Jeffrey D. King
+ *  @copyright  2012– Weather Source, LLC
+ *  @version    2.0
+ *  @todo       If suppress errors is on, we need to check the response for an error code and
+ *              grab the error number and text for logging purposes.
  */
 
+
+
+/**
+ *  Class to manage requests to and responses from the Weather Source API
+ */
 class Weather_Source_API_Requests {
-
-    static private
-        // config options
-        $base_uri,
-        $version,
-        $key,
-        $return_diagnostics,
-        $suppress_response_codes,
-        $distance_unit,
-        $temperature_unit,
-        $log_errors,
-        $error_log_directory,
-        $request_retry_count,
-        $request_retry_delay,
-        $max_threads,
-        $max_requests_per_minute,
-
-
-        // stores
-        $inch_fields       = array( 'precip', 'precipMax', 'precipAvg', 'precipMin',
-                                    'snowfall', 'snowfallMax', 'snowfallAvg', 'snowfallMin' ),
-        $mph_fields        = array( 'windSpd', 'windSpdMax', 'windSpdAvg', 'windSpdMin', 'prevailWindSpd' ),
-        $fahrenheit_fields = array( 'temp', 'tempMax', 'tempAvg', 'tempMin',
-                                    'dewPt', 'dewPtMax', 'dewPtAvg', 'dewPtMin',
-                                    'feelsLike', 'feelsLikeMax', 'feelsLikeAvg', 'feelsLikeMin',
-                                    'wetBulb', 'wetBulbMax', 'wetBulbAvg', 'wetBulbMin' ),
-        $inch_keys,        // flipped $inch_fields for efficient lookups
-        $mph_keys,         // flipped $mph_fields for efficient lookups
-        $fahrenheit_keys;  // flipped $fahrenheit_fields for efficient lookups
-
-    private
-        $curl_node;
 
 
     /**
+     *  @access  private
+     *  @static
+     *  @var     string  The base API URI.
+     */
+    static private $base_uri;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  The API version.
+     */
+    static private $version;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  The API key
+     */
+    static private $key;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     boolean  Return diagnostic information with response?
+     */
+    static private $return_diagnostics;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     boolean  Suppress all HTTP response codes (i.e. force a 200 response)?
+     */
+    static private $suppress_response_codes;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     string  Defines the unit type to return for relevant observations. Allowed
+     *                   values are 'imperial' and 'metric'.
+     */
+    static private $distance_unit;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     string  Defines the unit type to return for relevant observations. Allowed
+     *                   values are 'fahrenheit' and 'celsius'.
+     */
+    static private $temperature_unit;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     boolean  Should all errors be written to a log file?
+     */
+    static private $log_errors;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     string  Log file directory location.
+     */
+    static private $error_log_directory;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     integer  The number of times to retry a request that returns a potentially
+     *                    recoverable error.
+     */
+    static private $request_retry_count;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     integer  The delay in seconds before a request that returns a potentially
+     *                    recoverable error is retried.
+     */
+    static private $request_retry_delay;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     integer  The maximum thread count.
+     */
+    static private $max_threads;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     integer  Pace requests to comply with a subscription plan's minute rate limit.
+     */
+    static private $max_requests_per_minute;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  All API field names that return results as inches.
+     */
+    static private $inch_fields = array( 'precip', 'precipMax', 'precipAvg', 'precipMin',
+                                         'snowfall', 'snowfallMax', 'snowfallAvg', 'snowfallMin' );
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  All API field names that return results as miles per hour.
+     */
+    static private $mph_fields = array( 'windSpd', 'windSpdMax', 'windSpdAvg', 'windSpdMin',
+                                        'prevailWindSpd' );
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  All API field names that return results as degrees fahrenheit.
+     */
+    static private $fahrenheit_fields = array( 'temp', 'tempMax', 'tempAvg', 'tempMin', 'dewPt',
+                                               'dewPtMax', 'dewPtAvg', 'dewPtMin', 'feelsLike',
+                                               'feelsLikeMax', 'feelsLikeAvg', 'feelsLikeMin',
+                                               'wetBulb', 'wetBulbMax', 'wetBulbAvg', 'wetBulbMin' );
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  A key/value inverse of self::$inch_fields for fast lookups.
+     */
+    static private $inch_keys;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  A key/value inverse of self::$mph_fields for fast lookups.
+     */
+    static private $mph_keys;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  A key/value inverse of self::$fahrenheit_fields for fast lookups.
+     */
+    static private $fahrenheit_keys;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  The unique identifier for this instances Curl_Node.
+     */
+    private $curl_node;
+
+
+    /**
+     *  Initiate a class instance and add Weather Source API request to multithreaded
+     *  cURL handler
      *
-     *  Initiate a class instance and add Weather Source API request to multithreaded cURL handler
-     *
-     *  @param   $method         string  REQUIRED  The HTTP method for the request (allowed: 'GET', 'POST', 'PUT', 'DELETE')
-     *  @param   $resource_path  string  REQUIRED  The resource path for the request (i.e. 'history_by_postal_code')
-     *  @param   $parameters     array   REQUIRED  The resource parameters
-     *  @param   $callback       mixed   OPTIONAL  A string for a function name, and array [array(object, string)] for a clase method
-     *                                             If provided, the user defined callback function of this name will be called as this
-     *                                             individual request completes. You don't need to wait for everything to finish!
-     *
+     *  @access  public
+     *  @param   string    $method         [REQUIRED]  The HTTP method for the request
+     *                                                 (allowed: 'GET', 'POST', 'PUT',
+     *                                                 'DELETE')
+     *  @param   string    $resource_path  [REQUIRED]  The resource path for the request (i.e.
+     *                                                 'history_by_postal_code')
+     *  @param   array     $parameters     [REQUIRED]  The resource parameters
+     *  @param   callable  $callback       [OPTIONAL]  If provided, the user defined callback
+     *                                                 function called as this individual
+     *                                                 request completes. You don't need to
+     *                                                 wait for everything to finish!
      *  @return  NULL
     **/
     public function __construct( $method, $resource_path, $parameters, $callback = '' ) {
@@ -130,11 +272,11 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Wait for all outstanding nodes to complete
      *
-     *  @return NULL
-     *
+     *  @access  public
+     *  @static
+     *  @return  NULL
      */
     static public function finish() {
 
@@ -143,11 +285,10 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Get the status of a node associated with the cURL handle $handle
      *
-     *  @return  string   Possible values: "queued", "processing", "complete", "unknown"
-     *
+     *  @access  public
+     *  @return  string  Possible values: "queued", "processing", "complete", "unknown"
     **/
     public function get_status() {
 
@@ -156,13 +297,12 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Get all results from all completed requests
      *
+     *  @access  public
      *  @return  If request has completed, returns an associative array containing these keys:
      *           'response' (string), 'http_code' (string), 'latency' (float), 'url' (string),
      *           'opts' (array). If request has not completed, returns FALSE
-     *
     **/
     public function get_result() {
 
@@ -172,11 +312,11 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Return results for all completed request nodes
      *
-     *  @return array
-     *
+     *  @access  public
+     *  @static
+     *  @return  array
      */
     static public function get_results() {
 
@@ -194,18 +334,20 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  User defined callback function to process results as the individual request completes
      *
-     *  @param   $response   string  The response to the cURL response. Prepend with '&' to pass by reference.
-     *  @param   $metadata   string  User defined metadata associated with the request
-     *  @param   $http_code  string  The HTTP code generated by the cURL request
-     *  @param   $latency    float   Seconds elapsed since node added accurate to the nearest microsecond
-     *  @param   $url        string  User provided URL
-     *  @param   $opts       array   The cURL transfer options
-     *
+     *  @access  public
+     *  @static
+     *  @param   $response   string  [REQUIRED]  The response to the cURL response. Prepend
+     *                                           with '&' to pass by reference.
+     *  @param   $metadata   string  [REQUIRED]  User defined metadata associated with the
+     *                                           request
+     *  @param   $http_code  string  [REQUIRED]  The HTTP code generated by the cURL request
+     *  @param   $latency    float   [REQUIRED]  Seconds elapsed since node added accurate to
+     *                                           the nearest microsecond
+     *  @param   $url        string  [REQUIRED]  User provided URL
+     *  @param   $opts       array   [REQUIRED]  The cURL transfer options
      *  @return  NULL
-     *
     **/
     static public function process_result( &$response, $metadata, $http_code, $latency, $url, $opts ) {
 
@@ -276,10 +418,11 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Return the error message for the most recent request
      *
-     *  @return string  path to error log directory
+     *  @access  public
+     *  @static
+     *  @return  string  path to error log directory
      */
     static public function get_error_log_directory() {
 
@@ -288,14 +431,14 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Set the HTTP Status Code for the most recent request
      *
-     *  @param  integer  $request_uri    REQUIRED  The API request URI
-     *  @param  string   $http_code  REQUIRED  The HTTP Response Code
-     *  @param  string   $error_message  REQUIRED  The error message
-     *
-     *  @return NULL
+     *  @access  private
+     *  @static
+     *  @param   integer  $request_uri    [REQUIRED]  The API request URI
+     *  @param   string   $http_code      [REQUIRED]  The HTTP Response Code
+     *  @param   string   $error_message  [REQUIRED]  The error message
+     *  @return  NULL
      */
     static private function write_to_error_log( $request_uri, $http_code, $error_message ) {
 
@@ -331,13 +474,15 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Get the HTTP Response Message for a givin HTTP Response Code
      *
-     *  @param  integer  $http_code  REQUIRED  The HTTP Response Code for most recent request
-     *  @param  string   $curl_error     OPTIONAL  The text of the cURL error when $http_code == 0
-     *
-     *  @return string   HTTP Response Message
+     *  @access  private
+     *  @static
+     *  @param   integer  $http_code   [REQUIRED]  The HTTP Response Code for most
+     *                                             recent request
+     *  @param   string   $curl_error  [OPTIONAL]  The text of the cURL error when
+     *                                             $http_code == 0
+     *  @return  string   HTTP Response Message
      */
     static private function http_response_message( $http_code, $curl_error = '' ) {
 
@@ -392,12 +537,12 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Convert to preferred scales
      *
-     *  @param  array  $response  REQUIRED  The response array
-     *
-     *  @return NULL
+     *  @access  private
+     *  @static
+     *  @param   array  $response  [REQUIRED]  The response array
+     *  @return  NULL
      *
      */
     static private function scale_response( &$response ) {
@@ -409,14 +554,13 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Scale individual values (this is a callback function for array_walk_recursive)
      *
-     *  @param  array  $response  REQUIRED  The response array
-     *  @param  array  $response  REQUIRED  The response array
-     *
-     *  @return NULL
-     *
+     *  @access  private
+     *  @static
+     *  @param   array  $response  [REQUIRED]  The response array
+     *  @param   array  $response  [REQUIRED]  The response array
+     *  @return  NULL
      */
     static private function scale_value( &$value, &$key ) {
 
@@ -433,13 +577,12 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Convert inches to centimeters
      *
-     *  @param  float  $inches  REQUIRED
-     *
-     *  @return float  centimeter conversion value
-     *
+     *  @access  private
+     *  @static
+     *  @param   float  $inches  [REQUIRED]
+     *  @return  float  centimeter conversion value
      */
     static private function convert_inches_to_centimeters( $inches ) {
 
@@ -448,13 +591,12 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Convert mph to km/hour
      *
-     *  @param  float  $mph  REQUIRED
-     *
-     *  @return float  km/hour conversion value
-     *
+     *  @access  private
+     *  @static
+     *  @param   float  $mph  [REQUIRED]
+     *  @return  float  km/hour conversion value
      */
     static private function convert_mph_to_kmph( $mph ) {
 
@@ -463,13 +605,12 @@ class Weather_Source_API_Requests {
 
 
     /**
-     *
      *  Convert degrees fahrenheit to degrees celsius
      *
-     *  @param  float  $fahrenheit  REQUIRED
-     *
-     *  @return float  celsius conversion value
-     *
+     *  @access  private
+     *  @static
+     *  @param   float  $fahrenheit  [REQUIRED]
+     *  @return  float  celsius conversion value
      */
     static private function convert_fahrenheit_to_celsius( $fahrenheit ) {
 
