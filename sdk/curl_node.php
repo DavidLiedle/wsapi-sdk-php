@@ -88,10 +88,11 @@ class Curl_Node {
         $multi_handle,
         $threads,
         $status,
+        $add_nodes_lock,
         $max_threads            = 1,
         $max_retries            = 5,
         $retry_delay            = 2,  // seconds to wait before readding node to queue
-        $request_interval_delay = 0;  // seconds between launching new threads
+        $request_interval_delay = 1;  // seconds between launching new threads
 
     private
         $handle_string;
@@ -317,26 +318,31 @@ class Curl_Node {
             return;
         }
 
-        self::$multi_handle = empty(self::$multi_handle) ? curl_multi_init() : self::$multi_handle;
-        self::$threads      = empty(self::$threads)      ? 0                 : self::$threads;
-        self::$status       = !isset(self::$status)      ? CURLM_OK          : self::$status;
+        if( self::$add_nodes_lock !== TRUE ) {
+            self::$add_nodes_lock = TRUE;
+            self::$multi_handle   = empty(self::$multi_handle) ? curl_multi_init() : self::$multi_handle;
+            self::$threads        = empty(self::$threads)      ? 0                 : self::$threads;
+            self::$status         = !isset(self::$status)      ? CURLM_OK          : self::$status;
 
 
-        /*  add nodes to curl requests until $max_threads added or $queue exhausted  */
+            /*  add nodes to curl requests until $max_threads added or $queue exhausted  */
 
-        while( self::$threads < self::$max_threads && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
+            while( self::$threads < self::$max_threads && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
 
-            // add node to $nodes
-            $node = array_shift(self::$queue);
+                // add node to $nodes
+                $node = array_shift(self::$queue);
 
-            self::$nodes[(string) $node['handle']] = $node;
-            curl_multi_add_handle(self::$multi_handle, $node['handle']);
+                self::$nodes[(string) $node['handle']] = $node;
+                curl_multi_add_handle(self::$multi_handle, $node['handle']);
 
-            usleep( self::$request_interval_delay / 1000000 );
+                usleep( self::$request_interval_delay / 1000000 );
 
-            do {
-                self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
-            } while( CURLM_CALL_MULTI_PERFORM == self::$status );
+                do {
+                    self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
+                } while( CURLM_CALL_MULTI_PERFORM == self::$status );
+            }
+
+            self::$add_nodes_lock = FALSE;
         }
     }
 
