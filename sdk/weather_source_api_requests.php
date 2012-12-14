@@ -268,7 +268,9 @@ class Weather_Source_API_Requests {
                 $opts
             );
 
-            call_user_func_array( $metadata['callback'], $callback_params );
+            if( !empty($metadata['callback']) && ( (is_string($metadata['callback']) && function_exists($metadata['callback'])) || (is_array($metadata['callback']) && !empty($metadata['callback'][0]) && !empty($metadata['callback'][1]) && method_exists($metadata['callback'][0], $metadata['callback'][1])) ) ) {
+                call_user_func_array( $metadata['callback'], $callback_params );
+            }
         }
     }
 

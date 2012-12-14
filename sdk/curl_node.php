@@ -410,7 +410,9 @@ class Curl_Node {
                     $node['opts']
                 );
 
-                call_user_func_array( $callback, $callback_params );
+                if( !empty($callback) && ( (is_string($callback) && function_exists($callback)) || (is_array($callback) && !empty($callback[0]) && !empty($callback[1]) && method_exists($callback[0], $callback[1])) ) ) {
+                    call_user_func_array( $callback, $callback_params );
+                }
 
                 self::$results[(string) $handle] = $node;
 
