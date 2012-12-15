@@ -548,7 +548,7 @@ class Curl_Node {
             if( in_array($http_code, array(0,403,500,503,504)) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
-                sleep(self::$retry_delay);
+                sleep(self::retry_delay());
                 $node['retries']++;
                 self::$queue[] = $node;
                 continue;
@@ -681,6 +681,19 @@ class Curl_Node {
         $min_delay_microseconds      = (60/self::$max_requests_per_minute) * 1000000;
 
         return max($scaling_delay_microseconds, $min_delay_microseconds);
+    }
+
+
+    /**
+     *  Get request delay in microseconds for retries
+     *
+     *  @access  private
+     *  @static
+     *  @return  integer  The microseconds to delay before a retry requests
+     */
+    static private function retry_delay() {
+
+        return max(self::delay(), self::$retry_delay);
     }
 }
 
