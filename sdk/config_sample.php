@@ -103,5 +103,23 @@ define('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT', 5 );
  */
 define('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY', 2 );
 
+/**
+ *	@const  integer  [OPTIONAL]  The initial allowable requests per minute for warm-up scaling.
+ *							     WARNING: increasing this number may result in connection errors
+ *							     while the API infrustructure scales to meet your high demand.
+ *							     If not defined here, WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE
+ *							     defaults to 1000.
+ */
+define('WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE', 1000 );
+
+/**
+ *	@const  float  [OPTIONAL]  The number of minutes to double warm-up scaling allowable requests
+ *							   per minute. WARNING: decreasing this number may result in connection
+ *							   errors while the API infrustructure scales to meet your high demand.
+ *							   If not defined here, WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES defaults
+ *							   to 7.
+ */
+define('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES', 7 );
+
 
 ?>

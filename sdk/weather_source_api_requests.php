@@ -7,9 +7,8 @@
  *
  *  @author     Jeffrey D. King
  *  @copyright  2012– Weather Source, LLC
- *  @version    2.0
- *  @todo       If suppress errors is on, we need to check the response for an error code and
- *              grab the error number and text for logging purposes.
+ *  @version    2.1
+ *  @todo       Add logic to ramp up large jobs to allow load balancers to scale
  */
 
 
@@ -97,40 +96,6 @@ class Weather_Source_API_Requests {
     /**
      *  @access  private
      *  @static
-     *  @var     integer  The number of times to retry a request that returns a potentially
-     *                    recoverable error.
-     */
-    static private $request_retry_count;
-
-
-    /**
-     *  @access  private
-     *  @static
-     *  @var     integer  The delay in seconds before a request that returns a potentially
-     *                    recoverable error is retried.
-     */
-    static private $request_retry_delay;
-
-
-    /**
-     *  @access  private
-     *  @static
-     *  @var     integer  The maximum thread count.
-     */
-    static private $max_threads;
-
-
-    /**
-     *  @access  private
-     *  @static
-     *  @var     integer  Pace requests to comply with a subscription plan's minute rate limit.
-     */
-    static private $max_requests_per_minute;
-
-
-    /**
-     *  @access  private
-     *  @static
      *  @var     array  All API field names that return results as inches.
      */
     static private $inch_fields = array( 'precip', 'precipMax', 'precipAvg', 'precipMin',
@@ -212,28 +177,31 @@ class Weather_Source_API_Requests {
 
             require_once( __DIR__ . '/config.php' );
 
-            self::$base_uri                     = defined('WSAPI_BASE_URI') ? (string) WSAPI_BASE_URI : 'https://api.weathersource.com';
-            self::$version                      = defined('WSAPI_VERSION') ? (string) WSAPI_VERSION : 'v1';
-            self::$key                          = defined('WSAPI_KEY') ? (string) WSAPI_KEY : '';
-            self::$return_diagnostics           = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
-            self::$suppress_response_codes      = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES : FALSE;
-            self::$max_threads                  = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
-            self::$max_requests_per_minute      = defined('WSSDK_MAX_REQUESTS_PER_MINUTE') ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE : 10;
-            self::$distance_unit                = defined('WSSDK_DISTANCE_UNIT') ? (boolean) WSSDK_DISTANCE_UNIT : 'imperial';
-            self::$temperature_unit             = defined('WSSDK_TEMPERATURE_UNIT') ? (boolean) WSSDK_TEMPERATURE_UNIT : 'fahrenheit';
-            self::$log_errors                   = defined('WSSDK_LOG_ERRORS') ? (boolean) WSSDK_LOG_ERRORS : FALSE;
-            self::$error_log_directory          = defined('WSSDK_ERROR_LOG_DIRECTORY') ? (string) WSSDK_ERROR_LOG_DIRECTORY : 'error_logs/';
-            self::$request_retry_count          = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT : 5;
-            self::$request_retry_delay          = defined('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 2;
+            self::$base_uri                = defined('WSAPI_BASE_URI') ? (string) WSAPI_BASE_URI : 'https://api.weathersource.com';
+            self::$version                 = defined('WSAPI_VERSION') ? (string) WSAPI_VERSION : 'v1';
+            self::$key                     = defined('WSAPI_KEY') ? (string) WSAPI_KEY : '';
+            self::$return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
+            self::$suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES : FALSE;
+            self::$distance_unit           = defined('WSSDK_DISTANCE_UNIT') ? (boolean) WSSDK_DISTANCE_UNIT : 'imperial';
+            self::$temperature_unit        = defined('WSSDK_TEMPERATURE_UNIT') ? (boolean) WSSDK_TEMPERATURE_UNIT : 'fahrenheit';
+            self::$log_errors              = defined('WSSDK_LOG_ERRORS') ? (boolean) WSSDK_LOG_ERRORS : FALSE;
+            self::$error_log_directory     = defined('WSSDK_ERROR_LOG_DIRECTORY') ? (string) WSSDK_ERROR_LOG_DIRECTORY : 'error_logs/';
+            self::$inch_keys               = array_flip(self::$inch_fields);
+            self::$mph_keys                = array_flip(self::$mph_fields);
+            self::$fahrenheit_keys         = array_flip(self::$fahrenheit_fields);
+            $max_threads                   = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
+            $max_requests_per_minute       = defined('WSSDK_MAX_REQUESTS_PER_MINUTE') ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE : 10;
+            $request_retry_count           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT : 5;
+            $request_retry_delay           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 2;
+            $scaling_initial_requests_per_minute = defined('WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE') ? (integer) WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE : 1000;
+            $scaling_double_capacity_minutes     = defined('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 7;
 
-            self::$inch_keys       = array_flip(self::$inch_fields);
-            self::$mph_keys        = array_flip(self::$mph_fields);
-            self::$fahrenheit_keys = array_flip(self::$fahrenheit_fields);
-
-            Curl_Node::set_max_requests_per_minute(self::$max_requests_per_minute);
-            Curl_Node::set_max_threads(self::$max_threads);
-            Curl_Node::set_max_retries(self::$request_retry_count);
-            Curl_Node::set_retry_delay(self::$request_retry_delay);
+            Curl_Node::set_max_requests_per_minute($max_requests_per_minute);
+            Curl_Node::set_max_threads($max_threads);
+            Curl_Node::set_max_retries($request_retry_count);
+            Curl_Node::set_retry_delay($request_retry_delay);
+            Curl_Node::set_scaling_initial_requests_per_minute($scaling_initial_requests_per_minute);
+            Curl_Node::set_scaling_double_capacity_minutes($scaling_double_capacity_minutes);
         }
 
 

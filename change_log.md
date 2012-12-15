@@ -3,6 +3,14 @@ Change Log
 
 
 
+Version 2.1
+-----------
+
+Added warm-up scaling feature to reduce connection errors when making high volumes of
+	requests. By default, an initial 1000 requests per minute are allowed, doubling
+	every 7 minutes until the Max Requests Per Minute is reached.
+
+
 Version 2.0
 -----------
 

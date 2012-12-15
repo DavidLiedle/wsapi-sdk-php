@@ -3,7 +3,7 @@
 /**
  * @author     Jeffrey D. King
  * @copyright  2012- Weather Source, LLC
- * @since      Version 2.0
+ * @since      Version 2.1
  */
 
 
@@ -182,6 +182,32 @@ class Curl_Node {
 
     /**
      *  @access  private
+     *  @static
+     *  @var     integer  Initial allowable requests per minute for
+     *                    warm-up scaling.
+     */
+    static private $scaling_initial_requests_per_minute = 1000;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     float  The number of minutes to double warm-up scaling
+     *                  allowable requests per minute.
+     */
+    static private $scaling_double_capacity_minutes = 7;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     integer  The UNIX timestamp when warm-up scaling began.
+     */
+    static private $scaling_initialization_timestamp;
+
+
+    /**
+     *  @access  private
      *  @var     string  An individual cURL handle cast to a string. Used as
      *                   a unique id for efficient lookup from the self::$queue,
      *                   self::$active, and self::$complete stacks
@@ -207,6 +233,11 @@ class Curl_Node {
      *  @return  NULL
      */
     public function __construct( $url, $opts = array(), $callback = '', $metadata = '' ) {
+
+        // set our warm-up scaling timestamp if it is not already set
+        if( !isset(self::$scaling_initialization_timestamp) ) {
+            self::$scaling_initialization_timestamp = time();
+        }
 
         // force return of output
         $opts[CURLOPT_HEADER]         = 0;
@@ -236,6 +267,34 @@ class Curl_Node {
         self::request();
 
         $this->handle_string = (string) $handle;
+    }
+
+
+    /**
+     *  Set the initial allowable requests per minute for warm-up scaling.
+     *
+     *  @access  public
+     *  @static
+     *  @param   integer  $scaling_initial_requests_per_minute  [REQUIRED]  Allowable requests.
+     *  @return  NULL
+     */
+    static public function set_scaling_initial_requests_per_minute( $scaling_initial_requests_per_minute ) {
+
+        self::$scaling_initial_requests_per_minute = $scaling_initial_requests_per_minute;
+    }
+
+
+    /**
+     *  Set the number of minutes to double warm-up scaling allowable requests per minute.
+     *
+     *  @access  public
+     *  @static
+     *  @param   float  $scaling_double_capacity_minutes  [REQUIRED]  Minutes.
+     *  @return  NULL
+     */
+    static public function set_scaling_double_capacity_minutes( $scaling_double_capacity_minutes ) {
+
+        self::$scaling_double_capacity_minutes = $scaling_double_capacity_minutes;
     }
 
 
@@ -380,6 +439,7 @@ class Curl_Node {
             } while( 0 < self::$threads && CURLM_OK == self::$status );
 
             curl_multi_close(self::$multi_handle);
+            self::$multi_handle = NULL;
         }
     }
 
@@ -432,7 +492,7 @@ class Curl_Node {
                 self::$active[(string) $node['handle']] = $node;
                 curl_multi_add_handle(self::$multi_handle, $node['handle']);
 
-                usleep( (60/self::$max_requests_per_minute)*1000000 );
+                usleep( self::delay() );
 
                 do {
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
@@ -485,7 +545,7 @@ class Curl_Node {
 
             $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
 
-            if( in_array($http_code, array(0,500,503,504)) &&  $node['retries'] < self::$max_retries) {
+            if( in_array($http_code, array(0,403,500,503,504)) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
                 sleep(self::$retry_delay);
@@ -531,7 +591,7 @@ class Curl_Node {
         if( $processed && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
 
             // wait for the designated period to make sure we have a window
-            usleep( (60/self::$max_requests_per_minute)*1000000 );
+            usleep( self::delay() );
             self::add_nodes();
         }
     }
@@ -603,6 +663,24 @@ class Curl_Node {
         }
 
         return $text;
+    }
+
+
+    /**
+     *  Get request delay in microseconds
+     *
+     *  @access  private
+     *  @static
+     *  @return  integer  The microseconds to delay between requests
+     */
+    static private function delay() {
+
+        $scaling_minutes_elapsed     = (time() - self::$scaling_initialization_timestamp) / 60;
+        $scaling_requests_per_minute = self::$scaling_initial_requests_per_minute * pow(2, $scaling_minutes_elapsed / self::$scaling_double_capacity_minutes);
+        $scaling_delay_microseconds  = (60/$scaling_requests_per_minute) * 1000000;
+        $min_delay_microseconds      = (60/self::$max_requests_per_minute) * 1000000;
+
+        return max($scaling_delay_microseconds, $min_delay_microseconds);
     }
 }
 
