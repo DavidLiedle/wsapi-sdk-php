@@ -533,7 +533,7 @@ class Weather_Source_API_Requests {
     static private function scale_value( &$value, &$key ) {
 
         if( is_numeric($value) ) {
-            if( isset(self::$inch_keys[$key]) && self::distance_unit == 'metric' ) {
+            if( isset(self::$inch_keys[$key]) && self::$distance_unit == 'metric' ) {
                 $value = self::convert_inches_to_centimeters($value);
             } elseif( isset(self::$mph_keys[$key]) && self::$distance_unit == 'metric' ) {
                 $value = self::convert_mph_to_kmph($value);
