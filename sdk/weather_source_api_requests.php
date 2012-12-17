@@ -367,7 +367,7 @@ class Weather_Source_API_Requests {
         // convert response if user has specified alternate scales (i.e. metric or celsius)
         self::scale_response( $response );
 
-        if( isset( $metadata['callback'] ) ) {
+        if( !empty($metadata['callback']) && is_callable($metadata['callback']) ) {
 
             // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
             $callback_params = array(
@@ -377,10 +377,7 @@ class Weather_Source_API_Requests {
                 $url,
                 $opts
             );
-
-            if( !empty($metadata['callback']) && is_callable($metadata['callback']) ) {
-                call_user_func_array( $metadata['callback'], $callback_params );
-            }
+            call_user_func_array( $metadata['callback'], $callback_params );
         }
     }
 
