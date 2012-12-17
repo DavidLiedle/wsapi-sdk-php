@@ -222,17 +222,15 @@ class Curl_Node {
      *  @param   string  $url       [REQUIRED]  URL for the cURL request
      *  @param   array   $opts      [OPTIONAL]  An array of cURL options formatted like:
      *                                          array( CURLOPT_URL => 'http://example.com' )
-     *  @param   mixed   $callback  [OPTIONAL]  A string for a function name, and array
-     *                                          [array(object, string)] for a clase method
-     *  @param   mixed   $metadata  [OPTIONAL]  A container to attach any information you
-     *                                          want to associate with this request. If
-     *                                          provided, the user defined callback function
-     *                                          of this name will be called as this individual
-     *                                          request completes. You don't need to wait for
-     *                                          everything to finish!
+     *  @param   callable   $callback  [OPTIONAL]  If provided, the user defined callback
+     *                                          function will be called as this individual
+     *                                          request completes. You do not need to wait
+     *                                          for everything to finish!
+     *  @param   array   $metadata  [OPTIONAL]  A container to attach any information you
+     *                                          want to associate with this request.
      *  @return  NULL
      */
-    public function __construct( $url, $opts = array(), $callback = '', $metadata = '' ) {
+    public function __construct( $url, $opts = array(), $callback = '', $metadata = array() ) {
 
         // set our warm-up scaling timestamp if it is not already set
         if( !isset(self::$scaling_initialization_timestamp) ) {
