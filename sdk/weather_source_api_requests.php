@@ -379,6 +379,9 @@ class Weather_Source_API_Requests {
             );
             call_user_func_array( $metadata['callback'], $callback_params );
         }
+
+        // remove metadata from results
+        $metadata = NULL;
     }
 
 
