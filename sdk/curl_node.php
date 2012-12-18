@@ -3,7 +3,7 @@
 /**
  * @author     Jeffrey D. King
  * @copyright  2012- Weather Source, LLC
- * @since      Version 2.1
+ * @since      Version 2.2
  */
 
 

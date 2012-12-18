@@ -3,6 +3,14 @@ Change Log
 
 
 
+Version 2.2
+-----------
+
+Added cURL option to prevent HTTP 100 responses
+Improved memory efficiency
+Added warm-up scaling logic to retry requests
+
+
 Version 2.1
 -----------
 

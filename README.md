@@ -1,4 +1,4 @@
-PHP SDK for the Weather Source API Version 2.1
+PHP SDK for the Weather Source API Version 2.2
 ==============================================
 
 
