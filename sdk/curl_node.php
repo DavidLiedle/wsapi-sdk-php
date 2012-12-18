@@ -566,17 +566,25 @@ class Curl_Node {
                 // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
                 $callback_params = array(
                     &$node['response'],
-                    $node['metadata'],
-                    $node['http_code'],
-                    $node['latency'],
-                    $node['url'],
-                    $node['opts']
+                    &$node['metadata'],
+                    &$node['http_code'],
+                    &$node['latency'],
+                    &$node['url'],
+                    &$node['opts']
                 );
 
                 if( !empty($callback) && is_callable($callback) ) {
 
                     call_user_func_array( $callback, $callback_params );
                 }
+
+                // if the user set a node value to null in the callback function, just unset the parameter to save memory
+                if( $node['response']  === NULL ) unset($node['response']);
+                if( $node['metadata']  === NULL ) unset($node['metadata']);
+                if( $node['http_code'] === NULL ) unset($node['http_code']);
+                if( $node['latency']   === NULL ) unset($node['latency']);
+                if( $node['url']       === NULL ) unset($node['url']);
+                if( $node['opts']      === NULL ) unset($node['opts']);
 
                 self::$complete[(string) $handle] = $node;
 

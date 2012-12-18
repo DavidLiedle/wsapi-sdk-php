@@ -317,7 +317,7 @@ class Weather_Source_API_Requests {
      *  @param   $opts       array   [REQUIRED]  The cURL transfer options
      *  @return  NULL
     **/
-    static public function process_result( &$response, $metadata, $http_code, $latency, $url, $opts ) {
+    static public function process_result( &$response, &$metadata, &$http_code, &$latency, &$url, &$opts ) {
 
         $response_str = $response;
         $response = json_decode($response, TRUE);
@@ -372,10 +372,10 @@ class Weather_Source_API_Requests {
             // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
             $callback_params = array(
                 &$response,
-                $http_code,
-                $latency,
-                $url,
-                $opts
+                &$http_code,
+                &$latency,
+                &$url,
+                &$opts
             );
             call_user_func_array( $metadata['callback'], $callback_params );
         }
