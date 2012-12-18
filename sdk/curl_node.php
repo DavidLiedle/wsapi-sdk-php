@@ -241,6 +241,7 @@ class Curl_Node {
         $opts[CURLOPT_HEADER]         = 0;
         $opts[CURLOPT_RETURNTRANSFER] = 1;
         $opts[CURLOPT_URL]            = $url;
+        $opts[CURLOPT_HTTPHEADER]     = array('Expect:'); // prevent HTTP 100:Continue responses
 
         $handle = curl_init();
 

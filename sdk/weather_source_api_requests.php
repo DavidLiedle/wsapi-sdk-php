@@ -233,6 +233,7 @@ class Weather_Source_API_Requests {
             CURLOPT_CONNECTTIMEOUT       => 5,
             CURLOPT_DNS_CACHE_TIMEOUT    => 15,
             CURLOPT_DNS_USE_GLOBAL_CACHE => FALSE,
+            CURLOPT_HTTPHEADER           => array('Expect:'), // prevent HTTP 100:Continue responses
         );
 
         $this->curl_node = new Curl_Node($url, $opts, array( 'Weather_Source_API_Requests', 'process_result' ), array('callback' => $callback ) );
