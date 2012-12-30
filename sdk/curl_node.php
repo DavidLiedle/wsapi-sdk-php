@@ -547,7 +547,8 @@ class Curl_Node {
             if( in_array($http_code, array(0,403,500,503,504)) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
-                usleep(self::retry_delay());
+                // increase delay for multiple retries
+                usleep( (1+$node['retries']) * self::retry_delay() );
                 $node['retries']++;
                 self::$queue[] = $node;
                 continue;
