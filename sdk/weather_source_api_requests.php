@@ -7,7 +7,7 @@
  *
  *  @author     Jeffrey D. King
  *  @copyright  2012– Weather Source, LLC
- *  @version    2.2
+ *  @version    2.3
  *  @todo       Add logic to ramp up large jobs to allow load balancers to scale
  */
 

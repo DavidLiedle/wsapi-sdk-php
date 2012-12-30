@@ -3,6 +3,12 @@ Change Log
 
 
 
+Version 2.3
+-----------
+
+Fixed bug where sleep was for seconds rather than microseconds.
+
+
 Version 2.2
 -----------
 
