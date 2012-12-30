@@ -3,6 +3,13 @@ Change Log
 
 
 
+Version 2.4
+-----------
+
+Removed WSSDK_REQUEST_RETRY_ON_ERROR_DELAY from config_sample.php and set the retry delay
+    to double the expected delay per retry attempt.
+
+
 Version 2.3
 -----------
 

@@ -3,7 +3,7 @@
 /**
  * @author     Jeffrey D. King
  * @copyright  2012- Weather Source, LLC
- * @since      Version 2.3
+ * @since      Version 2.4
  */
 
 
@@ -158,17 +158,7 @@ class Curl_Node {
      *  @var     integer  The maximum number of retries if a request suffers
      *                    a potentially recoverable failure.
      */
-    static private $max_retries = 5;
-
-
-    /**
-     *  @access  private
-     *  @static
-     *  @var     integer  Delay in seconds between adding a node suffering
-     *                    from a potentially recoverable failure back into
-     *                    the self::$queue stack
-     */
-    static private $retry_delay = 2;
+    static private $max_retries = 10;
 
 
     /**
@@ -342,20 +332,6 @@ class Curl_Node {
 
 
     /**
-     *  Set the delay in seconds between retry requests
-     *
-     *  @access  public
-     *  @static
-     *  @param   integer  $retry_delay  [REQUIRED]  The delay in seconds between retry requests
-     *  @return  NULL
-     */
-    static public function set_retry_delay($retry_delay) {
-
-        self::$retry_delay = $retry_delay;
-    }
-
-
-    /**
      *  Get the status of a node
      *
      *  @access  public
@@ -491,7 +467,7 @@ class Curl_Node {
                 self::$active[(string) $node['handle']] = $node;
                 curl_multi_add_handle(self::$multi_handle, $node['handle']);
 
-                usleep( self::delay() );
+                usleep( self::delay() * pow(2,$node['retries']) );
 
                 do {
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
@@ -547,8 +523,6 @@ class Curl_Node {
             if( in_array($http_code, array(0,403,500,503,504)) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
-                // increase delay for multiple retries
-                usleep( (1+$node['retries']) * self::retry_delay() );
                 $node['retries']++;
                 self::$queue[] = $node;
                 continue;
@@ -689,19 +663,6 @@ class Curl_Node {
         $min_delay_microseconds      = (60/self::$max_requests_per_minute) * 1000000;
 
         return max($scaling_delay_microseconds, $min_delay_microseconds);
-    }
-
-
-    /**
-     *  Get request delay in microseconds for retries
-     *
-     *  @access  private
-     *  @static
-     *  @return  integer  The microseconds to delay before a retry requests
-     */
-    static private function retry_delay() {
-
-        return max(self::delay(), self::$retry_delay);
     }
 }
 

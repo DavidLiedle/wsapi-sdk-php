@@ -7,7 +7,7 @@
  *
  *  @author     Jeffrey D. King
  *  @copyright  2012– Weather Source, LLC
- *  @version    2.3
+ *  @version    2.4
  *  @todo       Add logic to ramp up large jobs to allow load balancers to scale
  */
 
@@ -199,7 +199,6 @@ class Weather_Source_API_Requests {
             Curl_Node::set_max_requests_per_minute($max_requests_per_minute);
             Curl_Node::set_max_threads($max_threads);
             Curl_Node::set_max_retries($request_retry_count);
-            Curl_Node::set_retry_delay($request_retry_delay);
             Curl_Node::set_scaling_initial_requests_per_minute($scaling_initial_requests_per_minute);
             Curl_Node::set_scaling_double_capacity_minutes($scaling_double_capacity_minutes);
         }

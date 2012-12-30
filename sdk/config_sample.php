@@ -3,7 +3,7 @@
 /**
  * @author Jeffrey D. King
  * @copyright 2012- Weather Source, LLC
- * @since Version 2.0
+ * @since Version 2.4
  */
 
 
@@ -91,17 +91,10 @@ define('WSSDK_ERROR_LOG_DIRECTORY', 'error_logs/' );
 
 /**
  *	@const  integer  [OPTIONAL]  The number of times to retry a request that returns a potentially
- *								 recoverable error. If not defined here,
- *							     WSSDK_REQUEST_RETRY_ON_ERROR_COUNT defaults to 5.
+ *								 recoverable error. Retries are exponentially delayed. If not defined
+ *								 here, WSSDK_REQUEST_RETRY_ON_ERROR_COUNT defaults to 10.
  */
-define('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT', 5 );
-
-/**
- *	@const  integer  [OPTIONAL]  The delay in seconds before a request that returns a potentially
- *							     recoverable error is retried. If not defined here,
- *							     WSSDK_REQUEST_RETRY_ON_ERROR_DELAY defaults to 2.
- */
-define('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY', 2 );
+define('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT', 10 );
 
 /**
  *	@const  integer  [OPTIONAL]  The initial allowable requests per minute for warm-up scaling.
