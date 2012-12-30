@@ -194,7 +194,7 @@ class Weather_Source_API_Requests {
             $request_retry_count           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT : 5;
             $request_retry_delay           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 2;
             $scaling_initial_requests_per_minute = defined('WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE') ? (integer) WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE : 1000;
-            $scaling_double_capacity_minutes     = defined('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 7;
+            $scaling_double_capacity_minutes     = defined('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES') ? (integer) WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES : 7;
 
             Curl_Node::set_max_requests_per_minute($max_requests_per_minute);
             Curl_Node::set_max_threads($max_threads);
