@@ -320,9 +320,8 @@ class Weather_Source_API_Requests {
     static public function process_result( &$response, &$metadata, &$http_code, &$latency, &$url, &$opts ) {
 
         $response_str = $response;
-        $response = json_decode($response, TRUE);
-
-        $response = is_array($response) ? $response : array();
+        $response     = json_decode($response, TRUE);
+        $response     = is_array($response) ? $response : array();
 
         // backfill any missing error messages
         if( $http_code != 200 ) {

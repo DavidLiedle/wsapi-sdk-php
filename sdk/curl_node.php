@@ -224,6 +224,7 @@ class Curl_Node {
 
         // set our warm-up scaling timestamp if it is not already set
         if( !isset(self::$scaling_initialization_timestamp) ) {
+
             self::$scaling_initialization_timestamp = time();
         }
 
@@ -240,16 +241,18 @@ class Curl_Node {
             curl_setopt( $handle, $option, $value );
         }
 
-        $node['handle']       = $handle;
-        $node['url']          = $url;
-        $node['opts']         = $opts;
-        $node['start']        = microtime(TRUE);
-        $node['latency']      = 0;
-        $node['retries']      = 0;
-        $node['http_code']    = '';
-        $node['response']     = '';
-        $node['callback']     = $callback;
-        $node['metadata']     = $metadata;
+        $node = array(
+           'handle'       => $handle,
+           'url'          => $url,
+           'opts'         => $opts,
+           'start'        => microtime(TRUE),
+           'latency'      => 0,
+           'retries'      => 0,
+           'http_code'    => '',
+           'response'     => '',
+           'callback'     => $callback,
+           'metadata'     => $metadata,
+        );
 
         self::$queue[(string) $handle] = $node;
 
@@ -520,7 +523,7 @@ class Curl_Node {
 
             $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
 
-            if( in_array($http_code, array(0,403,500,503,504)) &&  $node['retries'] < self::$max_retries) {
+            if( in_array($http_code, array(0,403,408,500,503,504)) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
                 $node['retries']++;
@@ -533,7 +536,7 @@ class Curl_Node {
 
                 $node['latency']    = microtime(TRUE) - $node['start'];
                 $node['http_code']  = (string) $http_code;
-                $node['response']   = ( $http_code == 200 ) ? curl_multi_getcontent($handle) : self::http_response_message($http_code, curl_error($handle));
+                $node['response']   = ( $http_code != 0 ) ? curl_multi_getcontent($handle) : curl_error($handle);
                 unset($node['handle']);
                 unset($node['start']);
                 unset($node['retries']);
@@ -576,75 +579,6 @@ class Curl_Node {
             usleep( self::delay() );
             self::add_nodes();
         }
-    }
-
-
-    /**
-     *  Get the HTTP Response Message for a givin HTTP Response Code
-     *
-     *  @access  private
-     *  @static
-     *  @param   $response_code  integer  [REQUIRED]  The HTTP Response Code for most
-     *                                                recent request
-     *  @param   $curl_error     string   [OPTIONAL]  The text of the cURL error when
-     *                                                $response_code == 0
-     *  @return  string   HTTP Response Message
-     */
-    static private function http_response_message( $response_code, $curl_error = '' ) {
-
-        $curl_error = empty($curl_error) ?  '' : ": $curl_error";
-
-        if( !is_null($response_code) ) {
-
-            switch ($response_code) {
-
-                case 0:   $text = 'Connection Error' . $curl_error; break;
-                case 100: $text = 'Continue'; break;
-                case 101: $text = 'Switching Protocols'; break;
-                case 200: $text = 'OK'; break;
-                case 201: $text = 'Created'; break;
-                case 202: $text = 'Accepted'; break;
-                case 203: $text = 'Non-Authoritative Information'; break;
-                case 204: $text = 'No Content'; break;
-                case 205: $text = 'Reset Content'; break;
-                case 206: $text = 'Partial Content'; break;
-                case 300: $text = 'Multiple Choices'; break;
-                case 301: $text = 'Moved Permanently'; break;
-                case 302: $text = 'Moved Temporarily'; break;
-                case 303: $text = 'See Other'; break;
-                case 304: $text = 'Not Modified'; break;
-                case 305: $text = 'Use Proxy'; break;
-                case 400: $text = 'Bad Request'; break;
-                case 401: $text = 'Unauthorized'; break;
-                case 402: $text = 'Payment Required'; break;
-                case 403: $text = 'Forbidden'; break;
-                case 404: $text = 'Not Found'; break;
-                case 405: $text = 'Method Not Allowed'; break;
-                case 406: $text = 'Not Acceptable'; break;
-                case 407: $text = 'Proxy Authentication Required'; break;
-                case 408: $text = 'Request Time-out'; break;
-                case 409: $text = 'Conflict'; break;
-                case 410: $text = 'Gone'; break;
-                case 411: $text = 'Length Required'; break;
-                case 412: $text = 'Precondition Failed'; break;
-                case 413: $text = 'Request Entity Too Large'; break;
-                case 414: $text = 'Request-URI Too Large'; break;
-                case 415: $text = 'Unsupported Media Type'; break;
-                case 500: $text = 'Internal Server Error'; break;
-                case 501: $text = 'Not Implemented'; break;
-                case 502: $text = 'Bad Gateway'; break;
-                case 503: $text = 'Service Unavailable'; break;
-                case 504: $text = 'Gateway Time-out'; break;
-                case 505: $text = 'HTTP Version not supported'; break;
-                default:  $text = 'Unknown status'; break;
-            }
-
-        } else {
-
-            $text = 'Unknown status'; break;
-        }
-
-        return $text;
     }
 
 
