@@ -198,6 +198,16 @@ class Curl_Node {
 
     /**
      *  @access  private
+     *  @static
+     *  @var     boolean  If set to true, every time a request is queued, '.' is output,
+     *                    every time a request is made, '+' is output, and every time a
+     *                    response is received for a request '-' is output.
+     */
+    static private $show_progress = FALSE;
+
+
+    /**
+     *  @access  private
      *  @var     string  An individual cURL handle cast to a string. Used as
      *                   a unique id for efficient lookup from the self::$queue,
      *                   self::$active, and self::$complete stacks
@@ -224,7 +234,6 @@ class Curl_Node {
 
         // set our warm-up scaling timestamp if it is not already set
         if( !isset(self::$scaling_initialization_timestamp) ) {
-
             self::$scaling_initialization_timestamp = time();
         }
 
@@ -241,20 +250,20 @@ class Curl_Node {
             curl_setopt( $handle, $option, $value );
         }
 
-        $node = array(
-           'handle'       => $handle,
-           'url'          => $url,
-           'opts'         => $opts,
-           'start'        => microtime(TRUE),
-           'latency'      => 0,
-           'retries'      => 0,
-           'http_code'    => '',
-           'response'     => '',
-           'callback'     => $callback,
-           'metadata'     => $metadata,
-        );
+        $node['handle']       = $handle;
+        $node['url']          = $url;
+        $node['opts']         = $opts;
+        $node['start']        = microtime(TRUE);
+        $node['latency']      = 0;
+        $node['retries']      = 0;
+        $node['http_code']    = '';
+        $node['response']     = '';
+        $node['callback']     = $callback;
+        $node['metadata']     = $metadata;
 
         self::$queue[(string) $handle] = $node;
+
+        if( self::$show_progress ) echo '.';
 
         self::request();
 
@@ -331,6 +340,23 @@ class Curl_Node {
     static public function set_max_retries($max_retries) {
 
         self::$max_retries = $max_retries;
+    }
+
+
+    /**
+     *  Set self::$show_progress to TRUE or FALSE
+     *
+     *  @access  public
+     *  @static
+     *  @param   boolean  $show_progress  [REQUIRED]  If set to true, every time a request is queued,
+     *                                                '.' is output, every time a request is made, '+'
+     *                                                is output, and every time a response is received
+     *                                                for a request '-' is output.
+     *  @return  NULL
+     */
+    static public function show_progress($show_progress) {
+
+        self::$show_progress = $show_progress;
     }
 
 
@@ -475,6 +501,8 @@ class Curl_Node {
                 do {
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
                 } while( CURLM_CALL_MULTI_PERFORM == self::$status );
+
+                if( self::$show_progress ) echo '+';
             }
 
             self::$add_nodes_lock = FALSE;
@@ -566,6 +594,8 @@ class Curl_Node {
                 if( $node['opts']      === NULL ) unset($node['opts']);
 
                 self::$complete[(string) $handle] = $node;
+
+                if( self::$show_progress ) echo '-';
 
                 curl_multi_remove_handle(self::$multi_handle, $handle);
             }
