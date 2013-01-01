@@ -7,7 +7,7 @@
  *
  *  @author     Jeffrey D. King
  *  @copyright  2012– Weather Source, LLC
- *  @version    2.4
+ *  @version    3.0
  *  @todo       Add logic to ramp up large jobs to allow load balancers to scale
  */
 
@@ -169,9 +169,10 @@ class Weather_Source_API_Requests {
      *                                                 function called as this individual
      *                                                 request completes. You don't need to
      *                                                 wait for everything to finish!
+     *  @param   boolean   $debug          [OPTIONAL]  Log debug info. Defaults to FALSE.
      *  @return  NULL
     **/
-    public function __construct( $method, $resource_path, $parameters, $callback = '' ) {
+    public function __construct( $method, $resource_path, $parameters, $callback = '', $debug = FALSE ) {
 
         if( empty(self::$base_uri) ) {
 
@@ -201,6 +202,7 @@ class Weather_Source_API_Requests {
             Curl_Node::set_max_retries($request_retry_count);
             Curl_Node::set_scaling_initial_requests_per_minute($scaling_initial_requests_per_minute);
             Curl_Node::set_scaling_double_capacity_minutes($scaling_double_capacity_minutes);
+            Curl_Node::set_debug($debug);
         }
 
 
@@ -298,6 +300,19 @@ class Weather_Source_API_Requests {
         }
 
         return $results;
+    }
+
+
+    /**
+     *  Get debug info.
+     *
+     *  @access  public
+     *  @static
+     *  @return  string  All debug information.
+     */
+    static public function get_debug_info() {
+
+        return Curl_Node::get_debug_info();
     }
 
 

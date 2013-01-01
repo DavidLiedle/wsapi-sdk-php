@@ -3,6 +3,14 @@ Change Log
 
 
 
+Version 3.0
+-----------
+
+Fixed bug that prevented request retries from operating correctly.
+Added capability to enable verbose output and/or progress output.
+Added debug output capability.
+
+
 Version 2.4
 -----------
 

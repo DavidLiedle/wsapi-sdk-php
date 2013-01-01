@@ -3,7 +3,7 @@
 /**
  * @author     Jeffrey D. King
  * @copyright  2012- Weather Source, LLC
- * @since      Version 2.4
+ * @since      Version 3.0
  */
 
 
@@ -199,11 +199,27 @@ class Curl_Node {
     /**
      *  @access  private
      *  @static
-     *  @var     boolean  If set to true, every time a request is queued, '.' is output,
-     *                    every time a request is made, '+' is output, and every time a
-     *                    response is received for a request '-' is output.
+     *  @var     boolean  If set to true, every time a request is queued, '+' is output,
+     *                    every time a request is made, '-' is output, and every time a
+     *                    response is received for a request '×' is output.
      */
     static private $show_progress = FALSE;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     boolean  Log debug information?
+     */
+    static private $debug = FALSE;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     string  All debug information is stored to this property.
+     */
+    static private $debug_info = '';
 
 
     /**
@@ -263,7 +279,8 @@ class Curl_Node {
 
         self::$queue[(string) $handle] = $node;
 
-        if( self::$show_progress ) echo '.';
+        if( self::$debug ) self::$debug_info += ((string) $handle) . ": added to queue\n";
+        if( self::$show_progress ) echo '+';
 
         self::request();
 
@@ -329,6 +346,20 @@ class Curl_Node {
 
 
     /**
+     *  Set debug logging
+     *
+     *  @access  public
+     *  @static
+     *  @param   boolean  $debug  [REQUIRED]  Log debug info?
+     *  @return  NULL
+     */
+    static public function set_debug($debug) {
+
+        self::$debug = $debug;
+    }
+
+
+    /**
      *  Set the maximum number of times to retry a recoverable error
      *
      *  @access  public
@@ -349,9 +380,9 @@ class Curl_Node {
      *  @access  public
      *  @static
      *  @param   boolean  $show_progress  [REQUIRED]  If set to true, every time a request is queued,
-     *                                                '.' is output, every time a request is made, '+'
+     *                                                '+' is output, every time a request is made, '-'
      *                                                is output, and every time a response is received
-     *                                                for a request '-' is output.
+     *                                                for a request '×' is output.
      *  @return  NULL
      */
     static public function show_progress($show_progress) {
@@ -425,6 +456,19 @@ class Curl_Node {
 
 
     /**
+     *  Get debug info.
+     *
+     *  @access  public
+     *  @static
+     *  @return  string  All debug information.
+     */
+    static public function get_debug_info() {
+
+        return self::$debug_info;
+    }
+
+
+    /**
      *  Wait for all request nodes to complete and process the results
      *
      *  @access  public
@@ -433,6 +477,7 @@ class Curl_Node {
      */
     static public function finish() {
 
+        if( self::$debug ) self::$debug_info += "Finishing\n";
         if( isset(self::$multi_handle) ) {
 
             do {
@@ -445,6 +490,7 @@ class Curl_Node {
             curl_multi_close(self::$multi_handle);
             self::$multi_handle = NULL;
         }
+        if( self::$debug ) self::$debug_info += "Finished\n";
     }
 
 
@@ -502,7 +548,8 @@ class Curl_Node {
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
                 } while( CURLM_CALL_MULTI_PERFORM == self::$status );
 
-                if( self::$show_progress ) echo '+';
+                if( self::$debug ) self::$debug_info += ((string) $node['handle']) . ": request submitted\n";
+                if( self::$show_progress ) echo '-';
             }
 
             self::$add_nodes_lock = FALSE;
@@ -524,6 +571,8 @@ class Curl_Node {
 
                 do {
 
+                    if( self::$debug ) self::$debug_info += "Waiting for response\n";
+
                     self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
 
                 } while (CURLM_CALL_MULTI_PERFORM == self::$status);
@@ -542,21 +591,28 @@ class Curl_Node {
 
         $processed = FALSE;
 
+        if( self::$debug ) self::$debug_info += "Processing responses\n";
+
         while( FALSE !== ($info = curl_multi_info_read(self::$multi_handle)) ) {
 
-            $handle   = $info['handle'];
-
-            $node = self::$active[(string) $handle];
+            $processed = TRUE;
+            $handle    = $info['handle'];
+            $node      = self::$active[(string) $handle];
+            $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
             unset(self::$active[(string) $handle]);
 
-            $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
+            if( self::$debug ) self::$debug_info += ((string) $handle) . ": processing response\n";
 
-            if( in_array($http_code, array(0,403,408,500,503,504)) &&  $node['retries'] < self::$max_retries) {
+            if( in_array($http_code, array('0','403','408','500','503','504')) &&  $node['retries'] < self::$max_retries) {
 
                 // we have an error that may be recovered from
+
                 $node['retries']++;
-                self::$queue[] = $node;
-                continue;
+
+                self::$queue[(string) $handle] = $node;
+
+                if( self::$debug ) self::$debug_info += ((string) $handle) . ": recoverable error ({$http_code}), resubmitted to queue\n";
+                if( self::$show_progress ) echo " +{$node['retries']} ";
 
             } else {
 
@@ -582,6 +638,7 @@ class Curl_Node {
 
                 if( !empty($callback) && is_callable($callback) ) {
 
+                    if( self::$debug ) self::$debug_info += ((string) $handle) . ": sending response to callback function\n";
                     call_user_func_array( $callback, $callback_params );
                 }
 
@@ -595,18 +652,15 @@ class Curl_Node {
 
                 self::$complete[(string) $handle] = $node;
 
-                if( self::$show_progress ) echo '-';
-
-                curl_multi_remove_handle(self::$multi_handle, $handle);
+                if( self::$debug ) self::$debug_info += ((string) $handle) . ": response processed\n";
+                if( self::$show_progress ) echo '×';
             }
 
-            $processed = TRUE;
+            curl_multi_remove_handle(self::$multi_handle, $handle);
         }
 
-        if( $processed && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
+        if( $processed && 0 < count(self::$queue) ) {
 
-            // wait for the designated period to make sure we have a window
-            usleep( self::delay() );
             self::add_nodes();
         }
     }
