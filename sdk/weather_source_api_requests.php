@@ -105,6 +105,14 @@ class Weather_Source_API_Requests {
     /**
      *  @access  private
      *  @static
+     *  @var     array  All API field names that return results as miles.
+     */
+    static private $miles_fields = array( 'sun_distance', 'moon_distance' );
+
+
+    /**
+     *  @access  private
+     *  @static
      *  @var     array  All API field names that return results as miles per hour.
      */
     static private $mph_fields = array( 'windSpd', 'windSpdMax', 'windSpdAvg', 'windSpdMin',
@@ -128,6 +136,14 @@ class Weather_Source_API_Requests {
      *  @var     array  A key/value inverse of self::$inch_fields for fast lookups.
      */
     static private $inch_keys;
+
+
+    /**
+     *  @access  private
+     *  @static
+     *  @var     array  A key/value inverse of self::$miles_fields for fast lookups.
+     */
+    static private $miles_keys;
 
 
     /**
@@ -188,6 +204,7 @@ class Weather_Source_API_Requests {
             self::$log_errors              = defined('WSSDK_LOG_ERRORS') ? (boolean) WSSDK_LOG_ERRORS : FALSE;
             self::$error_log_directory     = defined('WSSDK_ERROR_LOG_DIRECTORY') ? (string) WSSDK_ERROR_LOG_DIRECTORY : 'error_logs/';
             self::$inch_keys               = array_flip(self::$inch_fields);
+            self::$miles_keys              = array_flip(self::$miles_fields);
             self::$mph_keys                = array_flip(self::$mph_fields);
             self::$fahrenheit_keys         = array_flip(self::$fahrenheit_fields);
             $max_threads                   = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
@@ -549,6 +566,8 @@ class Weather_Source_API_Requests {
         if( is_numeric($value) ) {
             if( isset(self::$inch_keys[$key]) && self::$distance_unit == 'metric' ) {
                 $value = self::convert_inches_to_centimeters($value);
+            } elseif( isset(self::$miles_keys[$key]) && self::$distance_unit == 'metric' ) {
+                $value = self::convert_miles_to_km($value);
             } elseif( isset(self::$mph_keys[$key]) && self::$distance_unit == 'metric' ) {
                 $value = self::convert_mph_to_kmph($value);
             } elseif( isset(self::$fahrenheit_keys[$key]) && self::$temperature_unit == 'celsius' ) {
@@ -569,6 +588,20 @@ class Weather_Source_API_Requests {
     static private function convert_inches_to_centimeters( $inches ) {
 
         return round( $inches * 2.54, 2 );
+    }
+
+
+    /**
+     *  Convert mph to km/hour
+     *
+     *  @access  private
+     *  @static
+     *  @param   float  $mph  [REQUIRED]
+     *  @return  float  km/hour conversion value
+     */
+    static private function convert_miles_to_km( $miles ) {
+
+        return round( $miles * 1.60934, 2 );
     }
 
 
