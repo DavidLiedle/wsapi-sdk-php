@@ -1,18 +1,15 @@
-PHP SDK for the Weather Source API Version 3.0
-==============================================
+# PHP SDK for the Weather Source API Version 3.0
 
 
 
-Requirements
-------------
+## Requirements
 
 Requires PHP version 5.3.0 or greater.
 
 
 
 
-Installation
-------------
+## Installation
 
 1. Save api.weathersource.sdk directory to your application
 2. Rename api.weathersource.sdk/sdk/config_sample.php to api.weathersource.sdk/sdk/config.php
@@ -27,7 +24,7 @@ To acquire valid credentials, please contact Dave Smith at <dave@weathersource.c
 Weather_Source_API_Requests class
 ---------------------------------
 
-Include the class defination:
+Include the class definition:
 
     include_once('/path/to/api.weathersource.sdk/sdk/weather_source_api_requests.php');
 
@@ -42,8 +39,7 @@ With the proper options set in api.weathersource.sdk/sdk/config.php, this class 
 
 
 
-Use
----
+## Use
 
 The Weather_Source_API_Requests class (alias: Weather_Source_API_Request) is designed for multithreaded requests. Add multiple requests, and they will be processed as thread capacity allows.
 
