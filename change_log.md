@@ -1,7 +1,10 @@
 Change Log
 ==========
 
-
+Version 3.1
+-----------
+Code Cleanup & Formatting
+Removed trailing ?>'s
 
 Version 3.0
 -----------

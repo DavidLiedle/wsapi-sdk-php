@@ -196,26 +196,27 @@ class Weather_Source_API_Requests {
 
             require_once( __DIR__ . '/config.php' );
 
-            self::$base_uri                = defined('WSAPI_BASE_URI') ? (string) WSAPI_BASE_URI : 'https://api.weathersource.com';
-            self::$version                 = defined('WSAPI_VERSION') ? (string) WSAPI_VERSION : 'v1';
-            self::$key                     = defined('WSAPI_KEY') ? (string) WSAPI_KEY : '';
-            self::$return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS') ? (boolean) WSAPI_RETURN_DIAGNOSTICS : FALSE;
+            self::$base_uri                = defined('WSAPI_BASE_URI')                ? (string)  WSAPI_BASE_URI                : 'https://api.weathersource.com';
+            self::$version                 = defined('WSAPI_VERSION')                 ? (string)  WSAPI_VERSION                 : 'v1';
+            self::$key                     = defined('WSAPI_KEY')                     ? (string)  WSAPI_KEY                     : '';
+            self::$return_diagnostics      = defined('WSAPI_RETURN_DIAGNOSTICS')      ? (boolean) WSAPI_RETURN_DIAGNOSTICS      : FALSE;
             self::$suppress_response_codes = defined('WSAPI_SUPPRESS_RESPONSE_CODES') ? (boolean) WSAPI_SUPPRESS_RESPONSE_CODES : FALSE;
-            self::$distance_unit           = defined('WSSDK_DISTANCE_UNIT') ? (boolean) WSSDK_DISTANCE_UNIT : 'imperial';
-            self::$temperature_unit        = defined('WSSDK_TEMPERATURE_UNIT') ? (boolean) WSSDK_TEMPERATURE_UNIT : 'fahrenheit';
-            self::$log_errors              = defined('WSSDK_LOG_ERRORS') ? (boolean) WSSDK_LOG_ERRORS : FALSE;
-            self::$error_log_directory     = defined('WSSDK_ERROR_LOG_DIRECTORY') ? (string) WSSDK_ERROR_LOG_DIRECTORY : 'error_logs/';
+            self::$distance_unit           = defined('WSSDK_DISTANCE_UNIT')           ? (boolean) WSSDK_DISTANCE_UNIT           : 'imperial';
+            self::$temperature_unit        = defined('WSSDK_TEMPERATURE_UNIT')        ? (boolean) WSSDK_TEMPERATURE_UNIT        : 'fahrenheit';
+            self::$log_errors              = defined('WSSDK_LOG_ERRORS')              ? (boolean) WSSDK_LOG_ERRORS              : FALSE;
+            self::$error_log_directory     = defined('WSSDK_ERROR_LOG_DIRECTORY')     ? (string)  WSSDK_ERROR_LOG_DIRECTORY     : 'error_logs/';
+
             self::$inch_keys               = array_flip(self::$inch_fields);
             self::$miles_keys              = array_flip(self::$miles_fields);
             self::$mph_keys                = array_flip(self::$mph_fields);
             self::$fahrenheit_keys         = array_flip(self::$fahrenheit_fields);
 
-            $max_threads                   = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
-            $max_requests_per_minute       = defined('WSSDK_MAX_REQUESTS_PER_MINUTE') ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE : 10;
-            $request_retry_count           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT : 5;
-            $request_retry_delay           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY : 2;
+            $max_threads                   = defined('WSSDK_MAX_THREADS')                               ? (integer) WSSDK_MAX_THREADS                         : 10;
+            $max_requests_per_minute       = defined('WSSDK_MAX_REQUESTS_PER_MINUTE')                   ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE             : 10;
+            $request_retry_count           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT')              ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT        : 5;
+            $request_retry_delay           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_DELAY')              ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_DELAY        : 2;
             $scaling_initial_requests_per_minute = defined('WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE') ? (integer) WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE : 1000;
-            $scaling_double_capacity_minutes     = defined('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES') ? (integer) WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES : 7;
+            $scaling_double_capacity_minutes     = defined('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES')     ? (integer) WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES     : 7;
 
             Curl_Node::set_max_requests_per_minute($max_requests_per_minute);
             Curl_Node::set_max_threads($max_threads);
