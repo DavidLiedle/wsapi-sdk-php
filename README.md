@@ -1,12 +1,9 @@
-# PHP SDK for the Weather Source API Version 3.0
-
+# PHP SDK for the Weather Source API Version 3.1
 
 
 ## Requirements
 
 Requires PHP version 5.3.0 or greater.
-
-
 
 
 ## Installation
@@ -18,7 +15,6 @@ Requires PHP version 5.3.0 or greater.
 5. Use the SDK at will
 
 To acquire valid credentials, please contact Dave Smith at <dave@weathersource.com>.  Eventually, you will be able to sign up for an API account directly at <http://weathersource.com>, but this is not currently available.
-
 
 
 Weather_Source_API_Requests class
@@ -36,8 +32,6 @@ With the proper options set in api.weathersource.sdk/sdk/config.php, this class 
 4. Convert Fahrenheit results to Celsius values
 5. Suppress HTTP error codes
 6. Return diagnostic information with responses
-
-
 
 ## Use
 
@@ -57,7 +51,7 @@ You can optionally define a callback function that will process results as they 
      *
      *  @return  NULL
      *
-    **/
+     */
     function user_defined_callback( &$result, $http_code, $latency, $url, $opts ) {
 
         // do something to $result

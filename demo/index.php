@@ -1,9 +1,8 @@
 <?php
-
 /**
  * @author Jeffrey D. King
- * @copyright 2012- Weather Source, LLC
- * @since Version 2.0
+ * @copyright 2012-2015 Weather Source, LLC
+ * @since Version 3.1
  */
 
 
@@ -23,20 +22,22 @@ require_once( __DIR__ . '/../sdk/weather_source_api_requests.php' );
  *  @param   $url        string  User provided URL
  *  @param   $opts       array   The cURL transfer options
  *  @return  NULL
-**/
-function user_defined_callback( &$result, $http_code, $latency, $url, $opts ) {
+ */
+function user_defined_callback( &$result, $http_code, $latency, $url, $opts ){
+
     echo "<pre>callback \$result = ";
     print_r( $result );
     echo "</pre>";
 
     // unset the key field. Since $result was passed by reference, this will change the final $results
     unset($result['key']);
-}
+
+} // End of function user_defined_callback()
 
 
 /*  make multiple API requests  */
 
-for($i=0; $i<10; $i++) {
+for( $i=0; $i<10; $i++ ){
 
 
     /*  make an API request  */
@@ -49,8 +50,9 @@ for($i=0; $i<10; $i++) {
     );
 
     // $request->get_status() will return 'queued', 'processing', 'complete', or 'unknown'
-    echo "request status = {$request->get_status()}</br>";
-}
+    echo "request status = {$request->get_status()}<br>";
+
+} // End of for()
 
 
 /*  wait for all requests to complete  */
@@ -64,16 +66,16 @@ $results = Weather_Source_API_Requests::get_results();
 
 echo "<pre>summary \$results = ";
 print_r( $results );
-echo "</pre>";
+echo "\n</pre>";
 
 
 /*  get the last submitted request's result  */
 
 if( 'complete' == $request->get_status() ) {
+
     $result = $request->get_result();
     echo "<pre>last request \$result = ";
     print_r( $result );
     echo "</pre>";
-}
 
-?>
+} // End of if()

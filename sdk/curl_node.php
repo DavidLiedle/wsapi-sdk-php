@@ -1,13 +1,9 @@
 <?php
-
 /**
  * @author     Jeffrey D. King
- * @copyright  2012- Weather Source, LLC
- * @since      Version 3.0
+ * @copyright  2012-2015 Weather Source, LLC
+ * @since      Version 3.1
  */
-
-
-
 
 /**
  *  Class to manage multithreaded cURL requests
@@ -85,14 +81,12 @@
  */
 class Curl_Node {
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  Stack of queued requests
      */
     static private $queue;
-
 
     /**
      *  @access  private
@@ -101,14 +95,12 @@ class Curl_Node {
      */
     static private $active;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  Stack of completed requests
      */
     static private $complete;
-
 
     /**
      *  @access  private
@@ -117,7 +109,6 @@ class Curl_Node {
      */
     static private $multi_handle;
 
-
     /**
      *  @access  private
      *  @static
@@ -125,14 +116,12 @@ class Curl_Node {
      */
     static private $threads;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     integer  Status of the multi cURL stack
      */
     static private $status;
-
 
     /**
      *  @access  private
@@ -143,14 +132,12 @@ class Curl_Node {
      */
     static private $add_nodes_lock;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     integer  Upper limit for quantity of threads
      */
     static private $max_threads = 1;
-
 
     /**
      *  @access  private
@@ -160,7 +147,6 @@ class Curl_Node {
      */
     static private $max_retries = 10;
 
-
     /**
      *  @access  private
      *  @static
@@ -168,7 +154,6 @@ class Curl_Node {
      *                    per minute
      */
     static private $max_requests_per_minute = 10;
-
 
     /**
      *  @access  private
@@ -178,7 +163,6 @@ class Curl_Node {
      */
     static private $scaling_initial_requests_per_minute = 1000;
 
-
     /**
      *  @access  private
      *  @static
@@ -187,14 +171,12 @@ class Curl_Node {
      */
     static private $scaling_double_capacity_minutes = 7;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     integer  The UNIX timestamp when warm-up scaling began.
      */
     static private $scaling_initialization_timestamp;
-
 
     /**
      *  @access  private
@@ -205,14 +187,12 @@ class Curl_Node {
      */
     static private $show_progress = FALSE;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     boolean  Log debug information?
      */
     static private $debug = FALSE;
-
 
     /**
      *  @access  private
@@ -221,7 +201,6 @@ class Curl_Node {
      */
     static private $debug_info = '';
 
-
     /**
      *  @access  private
      *  @var     string  An individual cURL handle cast to a string. Used as
@@ -229,7 +208,6 @@ class Curl_Node {
      *                   self::$active, and self::$complete stacks
      */
     private $handle_string;
-
 
     /**
      *  Initiate a class instance and add a request to multithreaded cURL handler
@@ -246,12 +224,14 @@ class Curl_Node {
      *                                          want to associate with this request.
      *  @return  NULL
      */
-    public function __construct( $url, $opts = array(), $callback = '', $metadata = array() ) {
+    public function __construct( $url, $opts = array(), $callback = '', $metadata = array() ){
 
         // set our warm-up scaling timestamp if it is not already set
-        if( !isset(self::$scaling_initialization_timestamp) ) {
+        if( !isset(self::$scaling_initialization_timestamp) ){
+
             self::$scaling_initialization_timestamp = time();
-        }
+
+        } // End of if()
 
         // force return of output
         $opts[CURLOPT_HEADER]         = 0;
@@ -264,7 +244,8 @@ class Curl_Node {
         foreach($opts as $option => $value) {
 
             curl_setopt( $handle, $option, $value );
-        }
+
+        } // End of foreach()
 
         $node['handle']       = $handle;
         $node['url']          = $url;
@@ -279,14 +260,23 @@ class Curl_Node {
 
         self::$queue[(string) $handle] = $node;
 
-        if( self::$debug ) self::$debug_info += ((string) $handle) . ": added to queue\n";
-        if( self::$show_progress ) echo '+';
+        if( self::$debug ){
+
+            self::$debug_info += ((string) $handle) . ": added to queue\n";
+
+        } // End of if()
+
+        if( self::$show_progress ){
+
+            echo '+';
+
+        } // End of if()
 
         self::request();
 
         $this->handle_string = (string) $handle;
-    }
 
+    } // End of public function __construct()
 
     /**
      *  Set the initial allowable requests per minute for warm-up scaling.
@@ -296,10 +286,11 @@ class Curl_Node {
      *  @param   integer  $scaling_initial_requests_per_minute  [REQUIRED]  Allowable requests.
      *  @return  NULL
      */
-    static public function set_scaling_initial_requests_per_minute( $scaling_initial_requests_per_minute ) {
+    static public function set_scaling_initial_requests_per_minute( $scaling_initial_requests_per_minute ){
 
         self::$scaling_initial_requests_per_minute = $scaling_initial_requests_per_minute;
-    }
+
+    } // End of static public function set_scaling_initial_requests_per_minute()
 
 
     /**
@@ -310,10 +301,11 @@ class Curl_Node {
      *  @param   float  $scaling_double_capacity_minutes  [REQUIRED]  Minutes.
      *  @return  NULL
      */
-    static public function set_scaling_double_capacity_minutes( $scaling_double_capacity_minutes ) {
+    static public function set_scaling_double_capacity_minutes( $scaling_double_capacity_minutes ){
 
         self::$scaling_double_capacity_minutes = $scaling_double_capacity_minutes;
-    }
+
+    } // End of static public function set_scaling_double_capacity_minutes
 
 
     /**
@@ -324,10 +316,11 @@ class Curl_Node {
      *  @param   integer  $max_threads  [REQUIRED]  The maximum number of threads
      *  @return  NULL
      */
-    static public function set_max_threads( $max_threads ) {
+    static public function set_max_threads( $max_threads ){
 
         self::$max_threads = $max_threads;
-    }
+
+    } // End of static public function set_max_threads()
 
 
     /**
@@ -339,10 +332,11 @@ class Curl_Node {
      *                                                          between thread launches
      *  @return  NULL
      */
-    static public function set_max_requests_per_minute( $max_requests_per_minute ) {
+    static public function set_max_requests_per_minute( $max_requests_per_minute ){
 
         self::$max_requests_per_minute = $max_requests_per_minute;
-    }
+
+    } // End of static public function set_max_requests_per_minute()
 
 
     /**
@@ -353,10 +347,11 @@ class Curl_Node {
      *  @param   boolean  $debug  [REQUIRED]  Log debug info?
      *  @return  NULL
      */
-    static public function set_debug($debug) {
+    static public function set_debug( $debug ){
 
         self::$debug = $debug;
-    }
+
+    } // End of static public function set_debug()
 
 
     /**
@@ -368,10 +363,11 @@ class Curl_Node {
      *                                              a recoverable error.
      *  @return  NULL
      */
-    static public function set_max_retries($max_retries) {
+    static public function set_max_retries( $max_retries ){
 
         self::$max_retries = $max_retries;
-    }
+
+    } // End of static public function set_max_retries()
 
 
     /**
@@ -385,10 +381,11 @@ class Curl_Node {
      *                                                for a request '×' is output.
      *  @return  NULL
      */
-    static public function show_progress($show_progress) {
+    static public function show_progress( $show_progress ){
 
         self::$show_progress = $show_progress;
-    }
+
+    } // End of static public function show_progress()
 
 
     /**
@@ -397,7 +394,7 @@ class Curl_Node {
      *  @access  public
      *  @return  string   Possible values: "queued", "processing", "complete", "unknown"
      */
-    public function get_status() {
+    public function get_status(){
 
         if( is_array(self::$complete) && isset(self::$complete[$this->handle_string]) ) {
 
@@ -413,7 +410,8 @@ class Curl_Node {
         }
 
         return 'unknown';
-    }
+
+    } // End of public function get_status()
 
 
     /**
@@ -425,7 +423,7 @@ class Curl_Node {
      *                   containing these keys: 'response' (string), 'http_code' (string),
      *                   'latency' (float), 'url' (string), 'opts' (array).
      */
-    public function get_result() {
+    public function get_result(){
 
         if( isset(self::$complete[$this->handle_string]) ) {
 
@@ -434,8 +432,10 @@ class Curl_Node {
         } else {
 
             return FALSE;
+
         }
-    }
+
+    } // End of public function get_result()
 
 
     /**
@@ -447,12 +447,13 @@ class Curl_Node {
      *                  'response' (string), 'http_code' (string), 'latency' (float),
      *                  'url' (string), 'opts' (array)
      */
-    static public function get_results() {
+    static public function get_results(){
 
         self::finish();
 
         return isset(self::$complete) ? self::$complete : array();
-    }
+
+    } // End of static public function get_results()
 
 
     /**
@@ -462,10 +463,11 @@ class Curl_Node {
      *  @static
      *  @return  string  All debug information.
      */
-    static public function get_debug_info() {
+    static public function get_debug_info(){
 
         return self::$debug_info;
-    }
+
+    } // End of static public function get_debug_info()
 
 
     /**
@@ -475,10 +477,15 @@ class Curl_Node {
      *  @static
      *  @return  NULL
      */
-    static public function finish() {
+    static public function finish(){
 
-        if( self::$debug ) self::$debug_info += "Finishing\n";
-        if( isset(self::$multi_handle) ) {
+        if( self::$debug ){
+
+            self::$debug_info += "Finishing\n";
+
+        } // End of if()
+
+        if( isset(self::$multi_handle) ){
 
             do {
 
@@ -488,201 +495,267 @@ class Curl_Node {
             } while( 0 < self::$threads && CURLM_OK == self::$status );
 
             curl_multi_close(self::$multi_handle);
+
             self::$multi_handle = NULL;
-        }
-        if( self::$debug ) self::$debug_info += "Finished\n";
-    }
+
+        } // End of if()
+
+        if( self::$debug ){
+
+            self::$debug_info += "Finished\n";
+
+        } // End of if()
+
+    } // End of static public function finish()
 
 
 
-    /**
-     *  Add a node and process any results that may have completed
-     *
-     *  @access  private
-     *  @static
-     *  @return  NULL
-     */
-    static private function request() {
+            /**
+             *  Add a node and process any results that may have completed
+             *
+             *  @access  private
+             *  @static
+             *  @return  NULL
+             */
+            static private function request(){
 
-        self::add_nodes();
-        self::process_results();
-    }
+                self::add_nodes();
+                self::process_results();
 
-
-
-    /**
-     *  Add a node
-     *
-     *  @access  private
-     *  @static
-     *  @return  NULL
-     */
-    static private function add_nodes() {
-
-        if( 0 == count(self::$queue) ) {
-
-            return;
-        }
-
-        if( self::$add_nodes_lock !== TRUE ) {
-
-            self::$add_nodes_lock = TRUE;
-            self::$multi_handle   = empty(self::$multi_handle) ? curl_multi_init() : self::$multi_handle;
-            self::$threads        = empty(self::$threads)      ? 0                 : self::$threads;
-            self::$status         = !isset(self::$status)      ? CURLM_OK          : self::$status;
+            } // End of static private function request()
 
 
-            /*  add nodes to curl requests until $max_threads added or $queue exhausted  */
 
-            while( self::$threads < self::$max_threads && 0 < count(self::$queue) && CURLM_OK == self::$status ) {
+            /**
+             *  Add a node
+             *
+             *  @access  private
+             *  @static
+             *  @return  NULL
+             */
+            static private function add_nodes(){
 
-                // add node to $active
-                $node = array_shift(self::$queue);
+                if( 0 == count(self::$queue) ){
 
-                self::$active[(string) $node['handle']] = $node;
-                curl_multi_add_handle(self::$multi_handle, $node['handle']);
+                    return;
 
-                usleep( self::delay() * pow(2,$node['retries']) );
+                } // End of if()
 
-                do {
-                    self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
-                } while( CURLM_CALL_MULTI_PERFORM == self::$status );
+                if( self::$add_nodes_lock !== TRUE ){
 
-                if( self::$debug ) self::$debug_info += ((string) $node['handle']) . ": request submitted\n";
-                if( self::$show_progress ) echo '-';
-            }
-
-            self::$add_nodes_lock = FALSE;
-        }
-    }
-
-
-    /**
-     *  Wait until activity on a node occurs
-     *
-     *  @access  private
-     *  @static
-     *  @return  NULL
-     */
-    static private function wait_for_result() {
+                    self::$add_nodes_lock = TRUE;
+                    self::$multi_handle   = empty(self::$multi_handle) ? curl_multi_init() : self::$multi_handle;
+                    self::$threads        = empty(self::$threads)      ? 0                 : self::$threads;
+                    self::$status         = !isset(self::$status)      ? CURLM_OK          : self::$status;
 
 
-            if( CURLM_OK == self::$status && 0 < self::$threads && -1 != curl_multi_select(self::$multi_handle) ) {
+                    /*  add nodes to curl requests until $max_threads added or $queue exhausted  */
 
-                do {
+                    while( self::$threads < self::$max_threads && 0 < count(self::$queue) && CURLM_OK == self::$status ){
 
-                    if( self::$debug ) self::$debug_info += "Waiting for response\n";
+                        // add node to $active
+                        $node = array_shift(self::$queue);
 
-                    self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
+                        self::$active[(string) $node['handle']] = $node;
+                        curl_multi_add_handle( self::$multi_handle, $node['handle'] );
 
-                } while (CURLM_CALL_MULTI_PERFORM == self::$status);
-            }
-    }
+                        usleep( self::delay() * pow(2,$node['retries']) );
 
+                        do {
 
-    /**
-     *  Process any results that may have completed
-     *
-     *  @access  private
-     *  @static
-     *  @return  NULL
-     */
-    static private function process_results() {
+                            self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
 
-        $processed = FALSE;
+                        } while( CURLM_CALL_MULTI_PERFORM == self::$status );
 
-        if( self::$debug ) self::$debug_info += "Processing responses\n";
+                        if( self::$debug ){
 
-        while( FALSE !== ($info = curl_multi_info_read(self::$multi_handle)) ) {
+                            self::$debug_info += ((string) $node['handle']) . ": request submitted\n";
 
-            $processed = TRUE;
-            $handle    = $info['handle'];
-            $node      = self::$active[(string) $handle];
-            $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
-            unset(self::$active[(string) $handle]);
+                        } // End of if()
 
-            if( self::$debug ) self::$debug_info += ((string) $handle) . ": processing response\n";
+                        if( self::$show_progress ){
 
-            if( in_array($http_code, array('0','403','408','500','503','504')) &&  $node['retries'] < self::$max_retries) {
+                            echo '-';
 
-                // we have an error that may be recovered from
+                        } // End of if()
 
-                $node['retries']++;
+                    } // End of while()
 
-                self::$queue[(string) $handle] = $node;
+                    self::$add_nodes_lock = FALSE;
 
-                if( self::$debug ) self::$debug_info += ((string) $handle) . ": recoverable error ({$http_code}), resubmitted to queue\n";
-                if( self::$show_progress ) echo " +{$node['retries']} ";
+                } // End of if()
 
-            } else {
-
-                $callback = $node['callback'];
-
-                $node['latency']    = microtime(TRUE) - $node['start'];
-                $node['http_code']  = (string) $http_code;
-                $node['response']   = ( $http_code != 0 ) ? curl_multi_getcontent($handle) : curl_error($handle);
-                unset($node['handle']);
-                unset($node['start']);
-                unset($node['retries']);
-                unset($node['callback']);
-
-                // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
-                $callback_params = array(
-                    &$node['response'],
-                    &$node['metadata'],
-                    &$node['http_code'],
-                    &$node['latency'],
-                    &$node['url'],
-                    &$node['opts']
-                );
-
-                if( !empty($callback) && is_callable($callback) ) {
-
-                    if( self::$debug ) self::$debug_info += ((string) $handle) . ": sending response to callback function\n";
-                    call_user_func_array( $callback, $callback_params );
-                }
-
-                // if the user set a node value to null in the callback function, just unset the parameter to save memory
-                if( $node['response']  === NULL ) unset($node['response']);
-                if( $node['metadata']  === NULL ) unset($node['metadata']);
-                if( $node['http_code'] === NULL ) unset($node['http_code']);
-                if( $node['latency']   === NULL ) unset($node['latency']);
-                if( $node['url']       === NULL ) unset($node['url']);
-                if( $node['opts']      === NULL ) unset($node['opts']);
-
-                self::$complete[(string) $handle] = $node;
-
-                if( self::$debug ) self::$debug_info += ((string) $handle) . ": response processed\n";
-                if( self::$show_progress ) echo '×';
-            }
-
-            curl_multi_remove_handle(self::$multi_handle, $handle);
-        }
-
-        if( $processed && 0 < count(self::$queue) ) {
-
-            self::add_nodes();
-        }
-    }
+            } // End of static private function add_nodes()
 
 
-    /**
-     *  Get request delay in microseconds
-     *
-     *  @access  private
-     *  @static
-     *  @return  integer  The microseconds to delay between requests
-     */
-    static private function delay() {
-
-        $scaling_minutes_elapsed     = (time() - self::$scaling_initialization_timestamp) / 60;
-        $scaling_requests_per_minute = self::$scaling_initial_requests_per_minute * pow(2, $scaling_minutes_elapsed / self::$scaling_double_capacity_minutes);
-        $scaling_delay_microseconds  = (60/$scaling_requests_per_minute) * 1000000;
-        $min_delay_microseconds      = (60/self::$max_requests_per_minute) * 1000000;
-
-        return max($scaling_delay_microseconds, $min_delay_microseconds);
-    }
-}
+            /**
+             *  Wait until activity on a node occurs
+             *
+             *  @access  private
+             *  @static
+             *  @return  NULL
+             */
+            static private function wait_for_result(){
 
 
-?>
+                    if( CURLM_OK == self::$status && 0 < self::$threads && -1 != curl_multi_select(self::$multi_handle) ){
+
+                        do {
+
+                            if( self::$debug ){
+
+                                self::$debug_info += "Waiting for response\n";
+
+                            } // End of if()
+
+                            self::$status = curl_multi_exec(self::$multi_handle, self::$threads);
+
+                        } while (CURLM_CALL_MULTI_PERFORM == self::$status);
+
+                    } // End of if()
+
+            } // End of static private function wait_for_result()
+
+            /**
+             *  Process any results that may have completed
+             *
+             *  @access  private
+             *  @static
+             *  @return  NULL
+             */
+            static private function process_results(){
+
+                $processed = FALSE;
+
+                if( self::$debug ){
+
+                    self::$debug_info += "Processing responses\n";
+
+                } // End of if()
+
+                while( FALSE !== ($info = curl_multi_info_read(self::$multi_handle)) ){
+
+                    $processed = TRUE;
+                    $handle    = $info['handle'];
+                    $node      = self::$active[(string) $handle];
+                    $http_code = curl_getinfo( $node['handle'], CURLINFO_HTTP_CODE );
+
+                    unset(self::$active[(string) $handle]);
+
+                    if( self::$debug ){
+
+                        self::$debug_info += ((string) $handle) . ": processing response\n";
+
+                    } // End of if()
+
+                    if( in_array($http_code, array('0','403','408','500','503','504')) &&  $node['retries'] < self::$max_retries){
+
+                        // we have an error that may be recovered from
+
+                        $node['retries']++;
+
+                        self::$queue[(string) $handle] = $node;
+
+                        if( self::$debug ){
+
+                            self::$debug_info += ((string) $handle) . ": recoverable error ({$http_code}), resubmitted to queue\n";
+
+                        } // End of if()
+
+                        if( self::$show_progress ){
+
+                            echo " +{$node['retries']} ";
+
+                        } // End of if()
+
+                    } else {
+
+                        $callback = $node['callback'];
+
+                        $node['latency']    = microtime(TRUE) - $node['start'];
+                        $node['http_code']  = (string) $http_code;
+                        $node['response']   = ( $http_code != 0 ) ? curl_multi_getcontent($handle) : curl_error($handle);
+
+                        unset($node['handle']);
+                        unset($node['start']);
+                        unset($node['retries']);
+                        unset($node['callback']);
+
+                        // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
+                        $callback_params = array(
+                            &$node['response'],
+                            &$node['metadata'],
+                            &$node['http_code'],
+                            &$node['latency'],
+                            &$node['url'],
+                            &$node['opts']
+                        );
+
+                        if( !empty($callback) && is_callable($callback) ){
+
+                            if( self::$debug ){
+
+                                self::$debug_info += ((string) $handle) . ": sending response to callback function\n";
+
+                            } // End of if()
+
+                            call_user_func_array( $callback, $callback_params );
+
+                        } // End of if()
+
+                        // if the user set a node value to null in the callback function, just unset the parameter to save memory
+                        if( $node['response']  === NULL ) unset($node['response']);
+                        if( $node['metadata']  === NULL ) unset($node['metadata']);
+                        if( $node['http_code'] === NULL ) unset($node['http_code']);
+                        if( $node['latency']   === NULL ) unset($node['latency']);
+                        if( $node['url']       === NULL ) unset($node['url']);
+                        if( $node['opts']      === NULL ) unset($node['opts']);
+
+                        self::$complete[(string) $handle] = $node;
+
+                        if( self::$debug ){
+
+                            self::$debug_info += ((string) $handle) . ": response processed\n";
+
+                        } // End of if()
+
+                        if( self::$show_progress ){
+
+                            echo '×';
+
+                        } // End of if()
+
+                    } // End of if/else
+
+                    curl_multi_remove_handle(self::$multi_handle, $handle);
+
+                } // End of while()
+
+                if( $processed && 0 < count(self::$queue) ){
+
+                    self::add_nodes();
+
+                } // End of if()
+
+            } // End of static private function process_results()
+
+
+            /**
+             *  Get request delay in microseconds
+             *
+             *  @access  private
+             *  @static
+             *  @return  integer  The microseconds to delay between requests
+             */
+            static private function delay() {
+
+                $scaling_minutes_elapsed     = (time() - self::$scaling_initialization_timestamp) / 60;
+                $scaling_requests_per_minute = self::$scaling_initial_requests_per_minute * pow(2, $scaling_minutes_elapsed / self::$scaling_double_capacity_minutes);
+                $scaling_delay_microseconds  = (60/$scaling_requests_per_minute) * 1000000;
+                $min_delay_microseconds      = (60/self::$max_requests_per_minute) * 1000000;
+
+                return max($scaling_delay_microseconds, $min_delay_microseconds);
+
+            } // End of static private function delay()
+
+} // End of class Curl_Node

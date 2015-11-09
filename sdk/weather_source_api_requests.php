@@ -1,23 +1,19 @@
 <?php
-
 /**
  *  Weather Source API PHP SDK
  *
  *  Requires PHP version 5.3.0 or greater
  *
  *  @author     Jeffrey D. King
- *  @copyright  2012– Weather Source, LLC
- *  @version    3.0
+ *  @copyright  2012–2015 Weather Source, LLC
+ *  @version    3.1
  *  @todo       Add logic to ramp up large jobs to allow load balancers to scale
  */
-
-
 
 /**
  *  Class to manage requests to and responses from the Weather Source API
  */
 class Weather_Source_API_Requests {
-
 
     /**
      *  @access  private
@@ -26,14 +22,12 @@ class Weather_Source_API_Requests {
      */
     static private $base_uri;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  The API version.
      */
     static private $version;
-
 
     /**
      *  @access  private
@@ -42,7 +36,6 @@ class Weather_Source_API_Requests {
      */
     static private $key;
 
-
     /**
      *  @access  private
      *  @static
@@ -50,14 +43,12 @@ class Weather_Source_API_Requests {
      */
     static private $return_diagnostics;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     boolean  Suppress all HTTP response codes (i.e. force a 200 response)?
      */
     static private $suppress_response_codes;
-
 
     /**
      *  @access  private
@@ -67,7 +58,6 @@ class Weather_Source_API_Requests {
      */
     static private $distance_unit;
 
-
     /**
      *  @access  private
      *  @static
@@ -76,14 +66,12 @@ class Weather_Source_API_Requests {
      */
     static private $temperature_unit;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     boolean  Should all errors be written to a log file?
      */
     static private $log_errors;
-
 
     /**
      *  @access  private
@@ -92,15 +80,20 @@ class Weather_Source_API_Requests {
      */
     static private $error_log_directory;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  All API field names that return results as inches.
      */
-    static private $inch_fields = array( 'precip', 'precipMax', 'precipAvg', 'precipMin',
-                                         'snowfall', 'snowfallMax', 'snowfallAvg', 'snowfallMin' );
-
+    static private $inch_fields = array('precip'
+                                       ,'precipMax'
+                                       ,'precipAvg'
+                                       ,'precipMin'
+                                       ,'snowfall'
+                                       ,'snowfallMax'
+                                       ,'snowfallAvg'
+                                       ,'snowfallMin'
+                                       );
 
     /**
      *  @access  private
@@ -109,26 +102,40 @@ class Weather_Source_API_Requests {
      */
     static private $miles_fields = array( 'sun_distance', 'moon_distance' );
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  All API field names that return results as miles per hour.
      */
-    static private $mph_fields = array( 'windSpd', 'windSpdMax', 'windSpdAvg', 'windSpdMin',
-                                        'prevailWindSpd' );
-
+    static private $mph_fields = array('windSpd'
+                                      ,'windSpdMax'
+                                      ,'windSpdAvg'
+                                      ,'windSpdMin'
+                                      ,'prevailWindSpd'
+                                      );
 
     /**
      *  @access  private
      *  @static
      *  @var     array  All API field names that return results as degrees fahrenheit.
      */
-    static private $fahrenheit_fields = array( 'temp', 'tempMax', 'tempAvg', 'tempMin', 'dewPt',
-                                               'dewPtMax', 'dewPtAvg', 'dewPtMin', 'feelsLike',
-                                               'feelsLikeMax', 'feelsLikeAvg', 'feelsLikeMin',
-                                               'wetBulb', 'wetBulbMax', 'wetBulbAvg', 'wetBulbMin' );
-
+    static private $fahrenheit_fields = array('temp'
+                                             ,'tempMax'
+                                             ,'tempAvg'
+                                             ,'tempMin'
+                                             ,'dewPt'
+                                             ,'dewPtMax'
+                                             ,'dewPtAvg'
+                                             ,'dewPtMin'
+                                             ,'feelsLike'
+                                             ,'feelsLikeMax'
+                                             ,'feelsLikeAvg'
+                                             ,'feelsLikeMin'
+                                             ,'wetBulb'
+                                             ,'wetBulbMax'
+                                             ,'wetBulbAvg'
+                                             ,'wetBulbMin'
+                                             );
 
     /**
      *  @access  private
@@ -137,14 +144,12 @@ class Weather_Source_API_Requests {
      */
     static private $inch_keys;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  A key/value inverse of self::$miles_fields for fast lookups.
      */
     static private $miles_keys;
-
 
     /**
      *  @access  private
@@ -153,7 +158,6 @@ class Weather_Source_API_Requests {
      */
     static private $mph_keys;
 
-
     /**
      *  @access  private
      *  @static
@@ -161,14 +165,12 @@ class Weather_Source_API_Requests {
      */
     static private $fahrenheit_keys;
 
-
     /**
      *  @access  private
      *  @static
      *  @var     array  The unique identifier for this instances Curl_Node.
      */
     private $curl_node;
-
 
     /**
      *  Initiate a class instance and add Weather Source API request to multithreaded
@@ -187,10 +189,10 @@ class Weather_Source_API_Requests {
      *                                                 wait for everything to finish!
      *  @param   boolean   $debug          [OPTIONAL]  Log debug info. Defaults to FALSE.
      *  @return  NULL
-    **/
-    public function __construct( $method, $resource_path, $parameters, $callback = '', $debug = FALSE ) {
+     */
+    public function __construct( $method, $resource_path, $parameters, $callback = '', $debug = FALSE ){
 
-        if( empty(self::$base_uri) ) {
+        if( empty(self::$base_uri) ){
 
             require_once( __DIR__ . '/config.php' );
 
@@ -207,6 +209,7 @@ class Weather_Source_API_Requests {
             self::$miles_keys              = array_flip(self::$miles_fields);
             self::$mph_keys                = array_flip(self::$mph_fields);
             self::$fahrenheit_keys         = array_flip(self::$fahrenheit_fields);
+
             $max_threads                   = defined('WSSDK_MAX_THREADS') ? (integer) WSSDK_MAX_THREADS : 10;
             $max_requests_per_minute       = defined('WSSDK_MAX_REQUESTS_PER_MINUTE') ? (integer) WSSDK_MAX_REQUESTS_PER_MINUTE : 10;
             $request_retry_count           = defined('WSSDK_REQUEST_RETRY_ON_ERROR_COUNT') ? (integer) WSSDK_REQUEST_RETRY_ON_ERROR_COUNT : 5;
@@ -220,24 +223,28 @@ class Weather_Source_API_Requests {
             Curl_Node::set_scaling_initial_requests_per_minute($scaling_initial_requests_per_minute);
             Curl_Node::set_scaling_double_capacity_minutes($scaling_double_capacity_minutes);
             Curl_Node::set_debug($debug);
-        }
 
+        } // End of if
 
         /*  assemble our request URL  */
 
         $url = self::$base_uri . '/' . self::$version . '/' . self::$key . '/' . $resource_path . '.json';
 
-
         /*  append meta parameters  */
 
         $parameters['_method'] = strtolower($method);
-        if( self::$return_diagnostics ) {
-            $parameters['_diagnostics'] = '1';
-        }
-        if( self::$suppress_response_codes ) {
-            $parameters['_suppress_response_codes'] = '1';
-        }
 
+        if( self::$return_diagnostics ){
+
+            $parameters['_diagnostics'] = '1';
+
+        } // End of if()
+
+        if( self::$suppress_response_codes ){
+
+            $parameters['_suppress_response_codes'] = '1';
+
+        } // End of if()
 
         /*  form cURL opts  */
 
@@ -254,9 +261,15 @@ class Weather_Source_API_Requests {
             CURLOPT_HTTPHEADER           => array('Expect:'), // prevent HTTP 100:Continue responses
         );
 
-        $this->curl_node = new Curl_Node($url, $opts, array( 'Weather_Source_API_Requests', 'process_result' ), array('callback' => $callback ) );
-    }
+        $this->curl_node = new Curl_Node( $url,
+                                          $opts,
+                                          array('Weather_Source_API_Requests'
+                                               ,'process_result'
+                                               ),
+                                          array('callback' => $callback )
+                                               );
 
+    } // End of public function __construct()
 
     /**
      *  Wait for all outstanding nodes to complete
@@ -265,23 +278,23 @@ class Weather_Source_API_Requests {
      *  @static
      *  @return  NULL
      */
-    static public function finish() {
+    static public function finish(){
 
         Curl_Node::finish();
-    }
 
+    } // End of static public function finish()
 
     /**
      *  Get the status of a node associated with the cURL handle $handle
      *
      *  @access  public
      *  @return  string  Possible values: "queued", "processing", "complete", "unknown"
-    **/
-    public function get_status() {
+     */
+    public function get_status(){
 
         return $this->curl_node->get_status();
-    }
 
+    } // End of public function get_status()
 
     /**
      *  Get all results from all completed requests
@@ -290,12 +303,13 @@ class Weather_Source_API_Requests {
      *  @return  If request has completed, returns an associative array containing these keys:
      *           'response' (string), 'http_code' (string), 'latency' (float), 'url' (string),
      *           'opts' (array). If request has not completed, returns FALSE
-    **/
-    public function get_result() {
+     */
+    public function get_result(){
 
         $result = $this->curl_node->get_result();
         return $result['response'];
-    }
+
+    } // End of public function get_result()
 
 
     /**
@@ -305,19 +319,22 @@ class Weather_Source_API_Requests {
      *  @static
      *  @return  array
      */
-    static public function get_results() {
+    static public function get_results(){
 
         $raw_results = Curl_Node::get_results();
 
         //strip out all the metadata, and just return the response
         $results     = array();
 
-        foreach( $raw_results as $raw_result ) {
+        foreach( $raw_results as $raw_result ){
+
             $results[] = $raw_result['response'];
-        }
+
+        } // End of foreach()
 
         return $results;
-    }
+
+    } // End of static public function get_results()
 
 
     /**
@@ -327,10 +344,11 @@ class Weather_Source_API_Requests {
      *  @static
      *  @return  string  All debug information.
      */
-    static public function get_debug_info() {
+    static public function get_debug_info(){
 
         return Curl_Node::get_debug_info();
-    }
+
+    } // End of static public function get_debug_info()
 
 
     /**
@@ -348,57 +366,88 @@ class Weather_Source_API_Requests {
      *  @param   $url        string  [REQUIRED]  User provided URL
      *  @param   $opts       array   [REQUIRED]  The cURL transfer options
      *  @return  NULL
-    **/
-    static public function process_result( &$response, &$metadata, &$http_code, &$latency, &$url, &$opts ) {
+     */
+    static public function process_result( &$response, &$metadata, &$http_code, &$latency, &$url, &$opts ){
 
         $response_str = $response;
         $response     = json_decode($response, TRUE);
         $response     = is_array($response) ? $response : array();
 
         // backfill any missing error messages
-        if( $http_code != 200 ) {
+        if( $http_code != 200 ){
 
-            if( self::$return_diagnostics ) {
-                if( !isset($response['diagnostics']) ) {
+            if( self::$return_diagnostics ){
+
+                if( !isset($response['diagnostics']) ){
+
                     $response['diagnostics'] = array();
-                }
-                if( !isset($response['response']) ) {
-                    $response['response'] = array();
-                }
-                if( !isset($response['response']['response_code']) ) {
-                    $response['response']['response_code'] = $http_code;
-                }
-                if( !isset($response['response']['message']) ) {
-                    if( is_string($response_str) ) {
-                        $response['response']['message'] = self::http_response_message( $http_code, $response_str );
-                    } else {
-                        $response['response']['message'] = self::http_response_message( $http_code, '' );
-                    }
-                }
-            } else {
-                if( !isset($response['response_code']) ) {
-                    $response['response_code'] = $http_code;
-                }
-                if( !isset($response['message']) ) {
-                    if( is_string($response_str) ) {
-                        $response['message'] = self::http_response_message( $http_code, $response_str );
-                    } else {
-                        $response['message'] = self::http_response_message( $http_code, '' );
-                    }
-                }
-            }
 
-            if( self::$log_errors === TRUE ) {
+                } // End of if()
+
+                if( !isset($response['response']) ){
+
+                    $response['response'] = array();
+
+                } // End of if()
+
+                if( !isset($response['response']['response_code']) ){
+
+                    $response['response']['response_code'] = $http_code;
+
+                } // End of if()
+
+                if( !isset($response['response']['message']) ){
+
+                    if( is_string($response_str) ){
+
+                        $response['response']['message'] = self::http_response_message( $http_code, $response_str );
+
+                    } else {
+
+                        $response['response']['message'] = self::http_response_message( $http_code, '' );
+
+                    } // End of if/else
+
+                } // End of if()
+
+            } else {
+
+                if( !isset($response['response_code']) ){
+
+                    $response['response_code'] = $http_code;
+
+                } // End of if()
+
+                if( !isset($response['message']) ){
+
+                    if( is_string($response_str) ){
+
+                        $response['message'] = self::http_response_message( $http_code, $response_str );
+
+                    } else {
+
+                        $response['message'] = self::http_response_message( $http_code, '' );
+
+                    } // End of if/else
+
+                } // End of if()
+
+            } // End of if/else
+
+            if( self::$log_errors === TRUE ){
+
                 $request_uri   = $url . '?' . $opts[CURLOPT_POSTFIELDS];
                 $error_message = self::$return_diagnostics ? $response['response']['message'] : $response['message'];
                 self::write_to_error_log( $request_uri, $http_code, $error_message );
-            }
-        }
+
+            } // End of if()
+
+        } // End of if()
 
         // convert response if user has specified alternate scales (i.e. metric or celsius)
         self::scale_response( $response );
 
-        if( !empty($metadata['callback']) && is_callable($metadata['callback']) ) {
+        if( !empty($metadata['callback']) && is_callable($metadata['callback']) ){
 
             // we will for a $result array that allows $node['response'] to be passed by reference to user defined callback
             $callback_params = array(
@@ -408,12 +457,15 @@ class Weather_Source_API_Requests {
                 &$url,
                 &$opts
             );
+
             call_user_func_array( $metadata['callback'], $callback_params );
-        }
+
+        } // End of if()
 
         // remove metadata from results
         $metadata = NULL;
-    }
+
+    } // End of static public function process_result()
 
 
     /**
@@ -428,214 +480,236 @@ class Weather_Source_API_Requests {
         return __DIR__ . '/' . self::$error_log_directory;
     }
 
+            /**
+             *  Set the HTTP Status Code for the most recent request
+             *
+             *  @access  private
+             *  @static
+             *  @param   integer  $request_uri    [REQUIRED]  The API request URI
+             *  @param   string   $http_code      [REQUIRED]  The HTTP Response Code
+             *  @param   string   $error_message  [REQUIRED]  The error message
+             *  @return  NULL
+             */
+            static private function write_to_error_log( $request_uri, $http_code, $error_message ){
 
-    /**
-     *  Set the HTTP Status Code for the most recent request
-     *
-     *  @access  private
-     *  @static
-     *  @param   integer  $request_uri    [REQUIRED]  The API request URI
-     *  @param   string   $http_code      [REQUIRED]  The HTTP Response Code
-     *  @param   string   $error_message  [REQUIRED]  The error message
-     *  @return  NULL
-     */
-    static private function write_to_error_log( $request_uri, $http_code, $error_message ) {
-
-        // modify $request_uri to more readable format
-        $request_uri = urldecode($request_uri);
-
-
-        // compose our error message
-        $timestamp = date('c');
-        $error_message = "[{$timestamp}] [Error {$http_code} | {$error_message}] [{$request_uri}]\r\n";
-
-        // assemble our path parts
-        $directory = self::$error_log_directory;
-        $directory = substr($directory, -1) == '/' ? $directory : $directory . '/';
-        if( substr($directory, 0, 1) != '/' ) {
-            // this is a relative path
-            $directory = __DIR__ . '/' . $directory;
-        }
-
-        // make sure the error log directory exists
-        if( !is_dir($directory) ) {
-            mkdir($directory);
-        }
-
-        // assemble our error log filename
-        $filename = $directory . 'wsapi_errors_' . date('Ymd') . '.log';
-
-        // write to the error log
-        $file_pointer = fopen($filename, 'a+');
-        fwrite($file_pointer, $error_message);
-        fclose($file_pointer);
-    }
+                // modify $request_uri to more readable format
+                $request_uri = urldecode($request_uri);
 
 
-    /**
-     *  Get the HTTP Response Message for a givin HTTP Response Code
-     *
-     *  @access  private
-     *  @static
-     *  @param   integer  $http_code   [REQUIRED]  The HTTP Response Code for most
-     *                                             recent request
-     *  @param   string   $curl_error  [OPTIONAL]  The text of the cURL error when
-     *                                             $http_code == 0
-     *  @return  string   HTTP Response Message
-     */
-    static private function http_response_message( $http_code, $curl_error = '' ) {
+                // compose our error message
+                $timestamp = date('c');
+                $error_message = "[{$timestamp}] [Error {$http_code} | {$error_message}] [{$request_uri}]\r\n";
 
-        if( !is_null($http_code) ) {
-            switch( $http_code ) {
-                case 0:   $text = 'Connection Error' . $curl_error; break;
-                case 100: $text = 'Continue'; break;
-                case 101: $text = 'Switching Protocols'; break;
-                case 200: $text = 'OK'; break;
-                case 201: $text = 'Created'; break;
-                case 202: $text = 'Accepted'; break;
-                case 203: $text = 'Non-Authoritative Information'; break;
-                case 204: $text = 'No Content'; break;
-                case 205: $text = 'Reset Content'; break;
-                case 206: $text = 'Partial Content'; break;
-                case 300: $text = 'Multiple Choices'; break;
-                case 301: $text = 'Moved Permanently'; break;
-                case 302: $text = 'Moved Temporarily'; break;
-                case 303: $text = 'See Other'; break;
-                case 304: $text = 'Not Modified'; break;
-                case 305: $text = 'Use Proxy'; break;
-                case 400: $text = 'Bad Request'; break;
-                case 401: $text = 'Unauthorized'; break;
-                case 402: $text = 'Payment Required'; break;
-                case 403: $text = 'Forbidden'; break;
-                case 404: $text = 'Not Found'; break;
-                case 405: $text = 'Method Not Allowed'; break;
-                case 406: $text = 'Not Acceptable'; break;
-                case 407: $text = 'Proxy Authentication Required'; break;
-                case 408: $text = 'Request Time-out'; break;
-                case 409: $text = 'Conflict'; break;
-                case 410: $text = 'Gone'; break;
-                case 411: $text = 'Length Required'; break;
-                case 412: $text = 'Precondition Failed'; break;
-                case 413: $text = 'Request Entity Too Large'; break;
-                case 414: $text = 'Request-URI Too Large'; break;
-                case 415: $text = 'Unsupported Media Type'; break;
-                case 500: $text = 'Internal Server Error'; break;
-                case 501: $text = 'Not Implemented'; break;
-                case 502: $text = 'Bad Gateway'; break;
-                case 503: $text = 'Service Unavailable'; break;
-                case 504: $text = 'Gateway Time-out'; break;
-                case 505: $text = 'HTTP Version not supported'; break;
-                default:  $text = 'Unknown status'; break;
-            }
-        } else {
-            $text = 'Unknown status'; break;
-        }
+                // assemble our path parts
+                $directory = self::$error_log_directory;
+                $directory = substr($directory, -1) == '/' ? $directory : $directory . '/';
 
-        return $text;
-    }
+                if( substr($directory, 0, 1) != '/' ){
 
+                    // this is a relative path
+                    $directory = __DIR__ . '/' . $directory;
 
-    /**
-     *  Convert to preferred scales
-     *
-     *  @access  private
-     *  @static
-     *  @param   array  $response  [REQUIRED]  The response array
-     *  @return  NULL
-     *
-     */
-    static private function scale_response( &$response ) {
+                } // End of if()
 
-        if( self::$distance_unit == 'metric' || self::$temperature_unit == 'celsius' ) {
-            array_walk_recursive( $response, array('self', 'scale_value') );
-        }
-    }
+                // make sure the error log directory exists
+                if( !is_dir($directory) ){
 
+                    mkdir($directory);
 
-    /**
-     *  Scale individual values (this is a callback function for array_walk_recursive)
-     *
-     *  @access  private
-     *  @static
-     *  @param   array  $response  [REQUIRED]  The response array
-     *  @param   array  $response  [REQUIRED]  The response array
-     *  @return  NULL
-     */
-    static private function scale_value( &$value, &$key ) {
+                } // End of if()
 
-        if( is_numeric($value) ) {
-            if( isset(self::$inch_keys[$key]) && self::$distance_unit == 'metric' ) {
-                $value = self::convert_inches_to_centimeters($value);
-            } elseif( isset(self::$miles_keys[$key]) && self::$distance_unit == 'metric' ) {
-                $value = self::convert_miles_to_km($value);
-            } elseif( isset(self::$mph_keys[$key]) && self::$distance_unit == 'metric' ) {
-                $value = self::convert_mph_to_kmph($value);
-            } elseif( isset(self::$fahrenheit_keys[$key]) && self::$temperature_unit == 'celsius' ) {
-                $value = self::convert_fahrenheit_to_celsius($value);
-            }
-        }
-    }
+                // assemble our error log filename
+                $filename = $directory . 'wsapi_errors_' . date('Ymd') . '.log';
 
+                // write to the error log
+                $file_pointer = fopen($filename, 'a+');
+                fwrite($file_pointer, $error_message);
+                fclose($file_pointer);
 
-    /**
-     *  Convert inches to centimeters
-     *
-     *  @access  private
-     *  @static
-     *  @param   float  $inches  [REQUIRED]
-     *  @return  float  centimeter conversion value
-     */
-    static private function convert_inches_to_centimeters( $inches ) {
+            } // End of static private function write_to_error_log()
 
-        return round( $inches * 2.54, 2 );
-    }
+            /**
+             *  Get the HTTP Response Message for a givin HTTP Response Code
+             *
+             *  @access  private
+             *  @static
+             *  @param   integer  $http_code   [REQUIRED]  The HTTP Response Code for most
+             *                                             recent request
+             *  @param   string   $curl_error  [OPTIONAL]  The text of the cURL error when
+             *                                             $http_code == 0
+             *  @return  string   HTTP Response Message
+             */
+            static private function http_response_message( $http_code, $curl_error = '' ){
 
+                if( !is_null($http_code) ){
 
-    /**
-     *  Convert mph to km/hour
-     *
-     *  @access  private
-     *  @static
-     *  @param   float  $mph  [REQUIRED]
-     *  @return  float  km/hour conversion value
-     */
-    static private function convert_miles_to_km( $miles ) {
+                    switch( $http_code ){
 
-        return round( $miles * 1.60934, 2 );
-    }
+                        case 0:   $text = 'Connection Error' . $curl_error; break;
+                        case 100: $text = 'Continue';                       break;
+                        case 101: $text = 'Switching Protocols';            break;
+                        case 200: $text = 'OK';                             break;
+                        case 201: $text = 'Created';                        break;
+                        case 202: $text = 'Accepted';                       break;
+                        case 203: $text = 'Non-Authoritative Information';  break;
+                        case 204: $text = 'No Content';                     break;
+                        case 205: $text = 'Reset Content';                  break;
+                        case 206: $text = 'Partial Content';                break;
+                        case 300: $text = 'Multiple Choices';               break;
+                        case 301: $text = 'Moved Permanently';              break;
+                        case 302: $text = 'Moved Temporarily';              break;
+                        case 303: $text = 'See Other';                      break;
+                        case 304: $text = 'Not Modified';                   break;
+                        case 305: $text = 'Use Proxy';                      break;
+                        case 400: $text = 'Bad Request';                    break;
+                        case 401: $text = 'Unauthorized';                   break;
+                        case 402: $text = 'Payment Required';               break;
+                        case 403: $text = 'Forbidden';                      break;
+                        case 404: $text = 'Not Found';                      break;
+                        case 405: $text = 'Method Not Allowed';             break;
+                        case 406: $text = 'Not Acceptable';                 break;
+                        case 407: $text = 'Proxy Authentication Required';  break;
+                        case 408: $text = 'Request Time-out';               break;
+                        case 409: $text = 'Conflict';                       break;
+                        case 410: $text = 'Gone';                           break;
+                        case 411: $text = 'Length Required';                break;
+                        case 412: $text = 'Precondition Failed';            break;
+                        case 413: $text = 'Request Entity Too Large';       break;
+                        case 414: $text = 'Request-URI Too Large';          break;
+                        case 415: $text = 'Unsupported Media Type';         break;
+                        case 500: $text = 'Internal Server Error';          break;
+                        case 501: $text = 'Not Implemented';                break;
+                        case 502: $text = 'Bad Gateway';                    break;
+                        case 503: $text = 'Service Unavailable';            break;
+                        case 504: $text = 'Gateway Time-out';               break;
+                        case 505: $text = 'HTTP Version not supported';     break;
 
+                        default:  $text = 'Unknown status';                 break;
 
-    /**
-     *  Convert mph to km/hour
-     *
-     *  @access  private
-     *  @static
-     *  @param   float  $mph  [REQUIRED]
-     *  @return  float  km/hour conversion value
-     */
-    static private function convert_mph_to_kmph( $mph ) {
+                    } // End of switch()
 
-        return round( $mph * 1.60934, 1 );
-    }
+                } else {
 
+                    $text = 'Unknown status'; break;
 
-    /**
-     *  Convert degrees fahrenheit to degrees celsius
-     *
-     *  @access  private
-     *  @static
-     *  @param   float  $fahrenheit  [REQUIRED]
-     *  @return  float  celsius conversion value
-     */
-    static private function convert_fahrenheit_to_celsius( $fahrenheit ) {
+                } // End of if/else
 
-        return round( (($fahrenheit-32)*5)/9, 1 );
-    }
+                return $text;
 
-}
+            } // End of static private function http_response_message()
+
+            /**
+             *  Convert to preferred scales
+             *
+             *  @access  private
+             *  @static
+             *  @param   array  $response  [REQUIRED]  The response array
+             *  @return  NULL
+             *
+             */
+            static private function scale_response( &$response ){
+
+                if( self::$distance_unit == 'metric' || self::$temperature_unit == 'celsius' ){
+
+                    array_walk_recursive( $response, array('self', 'scale_value') );
+
+                } // End of if()
+
+            } // End of static private function scale_response()
+
+            /**
+             *  Scale individual values (this is a callback function for array_walk_recursive)
+             *
+             *  @access  private
+             *  @static
+             *  @param   array  $response  [REQUIRED]  The response array
+             *  @param   array  $response  [REQUIRED]  The response array
+             *  @return  NULL
+             */
+            static private function scale_value( &$value, &$key ){
+
+                if( is_numeric($value) ){
+
+                    if( isset(self::$inch_keys[$key]) && self::$distance_unit == 'metric' ){
+
+                        $value = self::convert_inches_to_centimeters($value);
+
+                    } elseif( isset(self::$miles_keys[$key]) && self::$distance_unit == 'metric' ){
+
+                        $value = self::convert_miles_to_km($value);
+
+                    } elseif( isset(self::$mph_keys[$key]) && self::$distance_unit == 'metric' ){
+
+                        $value = self::convert_mph_to_kmph($value);
+
+                    } elseif( isset(self::$fahrenheit_keys[$key]) && self::$temperature_unit == 'celsius' ){
+
+                        $value = self::convert_fahrenheit_to_celsius($value);
+
+                    } // End of if/elseif/elseif/elseif
+
+                } // End of if()
+
+            } // End of static private function scale_value()
+
+            /**
+             *  Convert inches to centimeters
+             *
+             *  @access  private
+             *  @static
+             *  @param   float  $inches  [REQUIRED]
+             *  @return  float  centimeter conversion value
+             */
+            static private function convert_inches_to_centimeters( $inches ){
+
+                return round( $inches * 2.54, 2 );
+
+            } // End of static private function convert_inches_to_centimeters()
+
+            /**
+             *  Convert mph to km/hour
+             *
+             *  @access  private
+             *  @static
+             *  @param   float  $mph  [REQUIRED]
+             *  @return  float  km/hour conversion value
+             */
+            static private function convert_miles_to_km( $miles ){
+
+                return round( $miles * 1.60934, 2 );
+
+            } // End of static private function convert_miles_to_km()
+
+            /**
+             *  Convert mph to km/hour
+             *
+             *  @access  private
+             *  @static
+             *  @param   float  $mph  [REQUIRED]
+             *  @return  float  km/hour conversion value
+             */
+            static private function convert_mph_to_kmph( $mph ){
+
+                return round( $mph * 1.60934, 1 );
+
+            } // End of static private function convert_mph_to_kmph()
+
+            /**
+             *  Convert degrees fahrenheit to degrees celsius
+             *
+             *  @access  private
+             *  @static
+             *  @param   float  $fahrenheit  [REQUIRED]
+             *  @return  float  celsius conversion value
+             */
+            static private function convert_fahrenheit_to_celsius( $fahrenheit ){
+
+                return round( (($fahrenheit-32)*5)/9, 1 );
+
+            } // End of static private function convert_fahrenheit_to_celsius()
+
+} // End of class Weather_Source_API_Requests
 
 class_alias('Weather_Source_API_Requests', 'Weather_Source_API_Request');
 
 require_once( __DIR__ . '/curl_node.php');
-
-?>

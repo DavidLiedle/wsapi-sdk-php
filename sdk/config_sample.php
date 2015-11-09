@@ -1,11 +1,9 @@
 <?php
-
 /**
  * @author Jeffrey D. King
- * @copyright 2012- Weather Source, LLC
- * @since Version 2.4
+ * @copyright 2012-2015 Weather Source, LLC
+ * @since Version 3.1
  */
-
 
 //==============================================================================
 //==    IMPORTANT:	after setting the configuration options below,
@@ -113,6 +111,3 @@ define('WSSDK_SCALING_INITIAL_REQUESTS_PER_MINUTE', 1000 );
  *							   to 7.
  */
 define('WSSDK_SCALING_DOUBLE_CAPACITY_MINUTES', 7 );
-
-
-?>
